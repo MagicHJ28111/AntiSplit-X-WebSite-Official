@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AntiSplit X - WebSite</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-grad: linear-gradient(180deg, #ffffff 0%, #f8fdfc 100%);
+    --text: #1a1a1a;
+    --text-muted: #444;
+    --text-dim: #777;
+    --panel: #fafafa;
+    --card: #ffffff;
+    --border: #eee;
+    --border-hover: #b2dfdb;
+    --accent: #00897b;
+    --accent-dark: #00695c;
+    --accent-light: #e0f2f1;
+    --badge-bg: #e3f2fd;
+    --badge-text: #1565c0;
+    --shadow: rgba(0,0,0,0.06);
+    --shadow-hover: rgba(0,137,123,0.15);
+  }
+  body.dark {
+    --bg: #0f0f0f;
+    --bg-grad: linear-gradient(180deg, #0f0f0f 0%, #131a19 100%);
+    --text: #eaeaea;
+    --text-muted: #b5b5b5;
+    --text-dim: #888;
+    --panel: #1a1a1a;
+    --card: #202020;
+    --border: #2a2a2a;
+    --border-hover: #00897b;
+    --accent: #4db6ac;
+    --accent-dark: #26a69a;
+    --accent-light: #14332f;
+    --badge-bg: #1a2e42;
+    --badge-text: #64b5f6;
+    --shadow: rgba(0,0,0,0.5);
+    --shadow-hover: rgba(77,182,172,0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Segoe UI', Roboto, -apple-system, sans-serif;
+    background: var(--bg-grad);
+    background-attachment: fixed;
+    color: var(--text);
+    line-height: 1.6;
+    padding: 100px 20px 60px;
+    max-width: 900px;
+    margin: 0 auto;
+    transition: background 0.3s, color 0.3s;
+    min-height: 100vh;
+  }
+
+  .top-controls {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 100;
+    display: flex;
+    gap: 8px;
+  }
+
+  .icon-btn {
+    width: 44px;
+    height: 44px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    font-size: 1.2em;
+    cursor: pointer;
+    box-shadow: 0 4px 14px var(--shadow);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+  }
+  .icon-btn:hover {
+    border-color: var(--accent);
+    box-shadow: 0 6px 20px var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  .lang-wrap { position: relative; }
+
+  .lang-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    padding: 10px 18px;
+    font-size: 0.9em;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    box-shadow: 0 4px 14px var(--shadow);
+    transition: all 0.2s;
+    font-family: inherit;
+    height: 44px;
+  }
+  .lang-btn:hover {
+    border-color: var(--accent);
+    box-shadow: 0 6px 20px var(--shadow-hover);
+  }
+  .lang-btn .arrow { font-size: 0.7em; opacity: 0.5; }
+
+  .lang-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 12px 40px var(--shadow);
+    padding: 8px;
+    width: 220px;
+    max-height: 420px;
+    overflow-y: auto;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: all 0.2s;
+  }
+  .lang-menu.open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .lang-menu::-webkit-scrollbar { width: 6px; }
+  .lang-menu::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+
+  .lang-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background 0.15s;
+  }
+  .lang-item:hover { background: var(--panel); }
+  .lang-item.active {
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+  body.dark .lang-item.active { color: var(--accent); }
+
+  .to-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    font-size: 1.3em;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+    transition: all 0.3s;
+    z-index: 99;
+  }
+  .to-top.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .to-top:hover { background: var(--accent-dark); transform: translateY(-3px); }
+
+  header {
+    text-align: center;
+    padding: 20px 0 40px;
+  }
+
+  .logo {
+    width: 76px;
+    height: 76px;
+    margin: 0 auto 18px;
+    display: block;
+    filter: drop-shadow(0 6px 18px var(--shadow-hover));
+    animation: float 4s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  h1 {
+    font-size: 2.4em;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  h1 span { color: var(--accent); }
+
+  .copy-btn {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 34px;
+    height: 34px;
+    cursor: pointer;
+    font-size: 0.85em;
+    color: var(--text-dim);
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  .subtitle {
+    display: inline-block;
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  body.dark .subtitle { color: var(--accent); }
+
+  /* ===== Views counter ===== */
+  .views-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 7px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 0.82em;
+    font-weight: 600;
+    color: var(--text-muted);
+    box-shadow: 0 4px 14px var(--shadow);
+    transition: all 0.25s;
+    animation: badgeFadeIn 0.6s ease;
+  }
+  @keyframes badgeFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .views-badge:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow-hover);
+  }
+  .views-badge .views-icon {
+    font-size: 1.1em;
+    animation: eyePulse 3s ease-in-out infinite;
+    display: inline-block;
+  }
+  @keyframes eyePulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.25); }
+  }
+  .views-badge .views-num {
+    font-weight: 800;
+    font-size: 1.05em;
+    color: var(--accent);
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+    min-width: 20px;
+    display: inline-block;
+    text-align: right;
+  }
+  .views-badge .views-label {
+    color: var(--text-dim);
+    font-size: 0.9em;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 22px;
+    transition: transform 0.3s, box-shadow 0.3s, background 0.3s, border-color 0.3s, opacity 0.6s;
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  .panel.visible { opacity: 1; transform: translateY(0); }
+  .panel.visible:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px var(--shadow);
+  }
+
+  .panel h2 {
+    font-size: 1.35em;
+    font-weight: 700;
+    margin-bottom: 18px;
+    padding-left: 14px;
+    border-left: 4px solid var(--accent);
+  }
+  .panel p { margin-bottom: 14px; color: var(--text-muted); }
+  .panel p:last-child { margin-bottom: 0; }
+
+  code {
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 0.88em;
+    font-family: 'Consolas', monospace;
+  }
+  body.dark code { color: var(--accent); }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-top: 22px;
+  }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    text-align: center;
+    transition: all 0.25s;
+  }
+  .stat:hover { border-color: var(--accent); transform: translateY(-3px); }
+  .stat .val { font-size: 1.05em; font-weight: 700; color: var(--accent); }
+  .stat .lbl {
+    font-size: 0.72em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+  }
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+  }
+  .feature {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    transition: all 0.25s;
+  }
+  .feature:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 22px var(--shadow-hover);
+    border-color: var(--border-hover);
+  }
+  .feature.hide { display: none; }
+  .feature .icon { font-size: 1.5em; margin-bottom: 8px; }
+  .feature h3 { font-size: 0.95em; font-weight: 700; margin-bottom: 6px; }
+  .feature p { font-size: 0.85em; color: var(--text-dim); margin: 0; }
+
+  .badge {
+    display: inline-block;
+    background: var(--badge-bg);
+    color: var(--badge-text);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.78em;
+    font-weight: 600;
+    margin: 4px 4px 0 0;
+  }
+
+  .search-wrap { position: relative; margin-bottom: 20px; }
+  .search {
+    width: 100%;
+    padding: 12px 18px 12px 44px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-size: 0.95em;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .search:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light);
+  }
+  .search-wrap::before {
+    content: '🔎';
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9em;
+    opacity: 0.6;
+  }
+  .no-results {
+    text-align: center;
+    color: var(--text-dim);
+    padding: 20px;
+    font-size: 0.9em;
+    display: none;
+  }
+
+  .faq-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+  .faq-item:hover { border-color: var(--border-hover); }
+  .faq-q {
+    padding: 16px 20px;
+    font-weight: 600;
+    font-size: 0.95em;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    user-select: none;
+  }
+  .faq-q::after {
+    content: '+';
+    font-size: 1.4em;
+    color: var(--accent);
+    transition: transform 0.3s;
+    line-height: 1;
+  }
+  .faq-item.open .faq-q::after { transform: rotate(45deg); }
+  .faq-a {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+    color: var(--text-muted);
+    font-size: 0.9em;
+  }
+  .faq-a-inner { padding: 0 20px 18px; }
+  .faq-item.open .faq-a { max-height: 500px; }
+
+  .change-item {
+    display: flex;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .change-item:last-child { border-bottom: none; }
+  .change-ver {
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 110px;
+    font-size: 0.9em;
+    font-family: 'Consolas', monospace;
+  }
+  .change-desc { font-size: 0.9em; color: var(--text-muted); }
+
+  .roadmap-item { margin-bottom: 18px; }
+  .roadmap-item:last-child { margin-bottom: 0; }
+  .roadmap-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    font-size: 0.92em;
+    font-weight: 600;
+  }
+  .rm-status {
+    font-size: 0.72em;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .rm-status.done { background: #d4f4dd; color: #1b7a3d; }
+  .rm-status.dev  { background: #fff2cc; color: #997404; }
+  .rm-status.plan { background: #e5e5ea; color: #555; }
+  body.dark .rm-status.done { background: #14402a; color: #6ee7a4; }
+  body.dark .rm-status.dev  { background: #4a3a0d; color: #ffd966; }
+  body.dark .rm-status.plan { background: #2a2a2a; color: #aaa; }
+
+  .roadmap-bar {
+    height: 8px;
+    background: var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .roadmap-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--accent), #26a69a);
+    border-radius: 6px;
+    transition: width 1.2s cubic-bezier(.2,.8,.2,1);
+    box-shadow: 0 0 12px rgba(0,137,123,0.4);
+  }
+  .panel.visible .roadmap-fill { width: var(--w); }
+
+  /* ===== Developer ===== */
+  .dev-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .dev-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00897b, #26a69a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 8px 24px var(--shadow-hover);
+    border: 3px solid var(--card);
+    position: relative;
+    overflow: hidden;
+  }
+  .dev-avatar::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px dashed var(--accent);
+    opacity: 0.4;
+    animation: spin 20s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .dev-info { flex: 1; min-width: 200px; }
+  .dev-name {
+    font-size: 1.5em;
+    font-weight: 800;
+    margin-bottom: 4px;
+    background: linear-gradient(90deg, #00c6ff, #0072ff, #4facfe, #ffffff, #4facfe, #0072ff, #00c6ff);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: magicWave 5s linear infinite;
+    filter: drop-shadow(0 0 6px rgba(79, 172, 254, 0.35));
+  }
+  @keyframes magicWave {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+  .dev-role {
+    font-size: 0.9em;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+  .dev-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .dev-tag {
+    font-size: 0.75em;
+    padding: 4px 10px;
+    border-radius: 10px;
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+  body.dark .dev-tag { color: var(--accent); }
+
+  .dev-bio {
+    font-size: 0.92em;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    line-height: 1.7;
+  }
+  .dev-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .dev-stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .dev-stat:hover { border-color: var(--accent); transform: translateY(-3px); }
+  .dev-stat .v { font-size: 1.15em; font-weight: 800; color: var(--accent); }
+  .dev-stat .l {
+    font-size: 0.7em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 3px;
+  }
+  .dev-contacts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .dev-contact {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .dev-contact:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px var(--shadow-hover);
+    color: var(--accent);
+  }
+  .dev-quote {
+    margin-top: 20px;
+    padding: 16px 20px;
+    background: var(--accent-light);
+    border-left: 4px solid var(--accent);
+    border-radius: 10px;
+    font-style: italic;
+    font-size: 0.92em;
+    color: var(--text-muted);
+  }
+
+  /* ===== Анимации Android-головы ===== */
+  @keyframes androidFloat {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-5px); }
+  }
+  @keyframes headTurn {
+    0%, 100% { transform: rotate(0deg); }
+    15%      { transform: rotate(-8deg); }
+    35%      { transform: rotate(-8deg); }
+    50%      { transform: rotate(8deg); }
+    70%      { transform: rotate(8deg); }
+    82%      { transform: rotate(0deg); }
+    90%      { transform: rotate(0deg); }
+  }
+  @keyframes eyesLook {
+    0%, 100% { transform: translate(0, 0); }
+    15%      { transform: translate(-3px, 0); }
+    35%      { transform: translate(-3px, 0); }
+    50%      { transform: translate(3px, 0); }
+    70%      { transform: translate(3px, 0); }
+    82%      { transform: translate(0, -3px); }
+    90%      { transform: translate(0, 0); }
+  }
+  @keyframes antennaLeft {
+    0%, 100% { transform: rotate(0deg); }
+    50%      { transform: rotate(-12deg); }
+  }
+  @keyframes antennaRight {
+    0%, 100% { transform: rotate(0deg); }
+    50%      { transform: rotate(12deg); }
+  }
+  @keyframes androidPulse {
+    0%, 100% { filter: drop-shadow(0 0 0 rgba(0,137,123,0)); }
+    50%      { filter: drop-shadow(0 0 12px rgba(0,137,123,0.6)); }
+  }
+  .dev-avatar svg {
+    animation: androidFloat 3s ease-in-out infinite,
+               androidPulse 3s ease-in-out infinite;
+    transform-origin: center;
+  }
+  .dev-avatar svg > path,
+  .dev-avatar svg > ellipse {
+    transform-origin: 60px 82px;
+    animation: headTurn 8s ease-in-out infinite;
+  }
+  .dev-avatar svg circle:nth-of-type(3),
+  .dev-avatar svg circle:nth-of-type(4),
+  .dev-avatar svg circle:nth-of-type(5),
+  .dev-avatar svg circle:nth-of-type(6),
+  .dev-avatar svg circle:nth-of-type(7),
+  .dev-avatar svg circle:nth-of-type(8) {
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: eyesLook 8s ease-in-out infinite;
+  }
+  .dev-avatar svg line:nth-of-type(1) {
+    transform-origin: 44px 38px;
+    animation: antennaLeft 2s ease-in-out infinite;
+  }
+  .dev-avatar svg line:nth-of-type(2) {
+    transform-origin: 76px 38px;
+    animation: antennaRight 2s ease-in-out infinite;
+  }
+  .dev-avatar svg circle:nth-of-type(1) {
+    transform-origin: 44px 38px;
+    animation: antennaLeft 2s ease-in-out infinite;
+  }
+  .dev-avatar svg circle:nth-of-type(2) {
+    transform-origin: 76px 38px;
+    animation: antennaRight 2s ease-in-out infinite;
+  }
+
+  /* ===== Download ===== */
+  .download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 32px;
+    background: linear-gradient(135deg, var(--accent), #26a69a);
+    color: #fff;
+    border: none;
+    border-radius: 18px;
+    font-family: inherit;
+    font-size: 1em;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 28px rgba(0,137,123,0.35);
+    transition: all 0.25s;
+    text-align: left;
+  }
+  .download-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 36px rgba(0,137,123,0.5);
+  }
+  .download-btn:active { transform: translateY(-1px); }
+  .download-btn .dl-icon {
+    font-size: 1.6em;
+    animation: bounceDown 1.8s ease-in-out infinite;
+  }
+  @keyframes bounceDown {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(4px); }
+  }
+  .download-btn .dl-title { display: block; font-size: 1.05em; line-height: 1.2; }
+  .download-btn .dl-sub {
+    display: block;
+    font-size: 0.75em;
+    opacity: 0.85;
+    font-weight: 500;
+    margin-top: 2px;
+  }
+
+  .dl-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .dl-overlay.show { opacity: 1; pointer-events: auto; }
+
+  .dl-overlay-inner {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 28px;
+    max-width: 460px;
+    width: 100%;
+    position: relative;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+    transform: scale(0.9);
+    transition: transform 0.3s;
+  }
+  .dl-overlay.show .dl-overlay-inner { transform: scale(1); }
+
+  .dl-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text-dim);
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .dl-close:hover { color: #e74c3c; border-color: #e74c3c; }
+
+  .dl-ad-label {
+    font-size: 0.68em;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .dl-ad {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 16px;
+    padding: 16px;
+    color: #fff;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 20px rgba(102,126,234,0.35);
+  }
+  .dl-ad-icon { font-size: 2.2em; flex-shrink: 0; }
+  .dl-ad-content { flex: 1; min-width: 0; }
+  .dl-ad-title { font-size: 1em; font-weight: 800; margin-bottom: 3px; }
+  .dl-ad-desc { font-size: 0.78em; opacity: 0.9; margin-bottom: 8px; line-height: 1.3; }
+  .dl-ad-btn {
+    background: #fff;
+    color: #5a3ea8;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 10px;
+    font-size: 0.82em;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.15s;
+  }
+  .dl-ad-btn:hover { transform: scale(1.05); }
+
+  .dl-progress-wrap { margin-bottom: 4px; }
+  .dl-progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85em;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .dl-progress-label span:last-child {
+    color: var(--accent);
+    font-family: 'Consolas', monospace;
+    font-weight: 700;
+  }
+  .dl-progress-bar {
+    height: 8px;
+    background: var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .dl-progress-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--accent), #26a69a);
+    border-radius: 6px;
+    transition: width 1s linear;
+    box-shadow: 0 0 12px rgba(0,137,123,0.5);
+  }
+  .dl-final { display: none; text-align: center; animation: fadeInUp 0.4s ease; }
+  .dl-final.show { display: block; }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .dl-ready-icon { font-size: 3em; margin-bottom: 8px; animation: pop 0.5s ease; }
+  @keyframes pop {
+    0%   { transform: scale(0); }
+    70%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+  .dl-ready-title { font-size: 1.3em; font-weight: 800; margin-bottom: 4px; color: var(--accent); }
+  .dl-ready-sub { font-size: 0.82em; color: var(--text-dim); margin-bottom: 18px; }
+  .dl-final-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #00c853, #00a040);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 14px;
+    font-size: 1.1em;
+    font-weight: 800;
+    box-shadow: 0 10px 26px rgba(0,200,83,0.35);
+    transition: all 0.25s;
+    margin-bottom: 12px;
+  }
+  .dl-final-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 34px rgba(0,200,83,0.5);
+  }
+  .dl-final-note { font-size: 0.75em; color: var(--text-dim); }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.85em;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translate(-50%, 100px);
+    background: var(--accent);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 0.9em;
+    font-weight: 600;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 900;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  body.party { animation: partyHue 0.6s linear infinite; }
+  @keyframes partyHue {
+    0%   { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+  }
+  .confetti {
+    position: fixed;
+    top: -20px;
+    font-size: 1.6em;
+    pointer-events: none;
+    z-index: 999;
+    animation: fall linear forwards;
+  }
+  @keyframes fall {
+    to { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+  }
+
+  @media (max-width: 500px) {
+    body { padding: 90px 16px 40px; }
+    h1 { font-size: 1.7em; }
+    .panel { padding: 22px; }
+    .lang-btn { padding: 8px 12px; font-size: 0.8em; }
+    .lang-btn #currentLang { display: none; }
+    .top-controls { top: 12px; right: 12px; }
+    .icon-btn, .lang-btn { height: 40px; }
+    .icon-btn { width: 40px; font-size: 1em; }
+    .dev-header { justify-content: center; text-align: center; }
+    .dev-contacts { justify-content: center; }
+    .download-btn { padding: 14px 22px; font-size: 0.92em; }
+    .dl-overlay-inner { padding: 22px; }
+    .dl-ad { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-controls">
+  <button class="icon-btn" id="themeBtn" title="Theme">🌙</button>
+  <div class="lang-wrap">
+    <button class="lang-btn" id="langBtn">
+      <span>🌐</span>
+      <span id="currentLang">Русский</span>
+      <span class="arrow">▼</span>
+    </button>
+    <div class="lang-menu" id="langMenu"></div>
+  </div>
+</div>
+
+<button class="to-top" id="toTop" title="Up">↑</button>
+<div class="toast" id="toast"></div>
+
+<header>
+  <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="appIconBg" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#1e88e5"/>
+        <stop offset="100%" stop-color="#0d47a1"/>
+      </linearGradient>
+      <linearGradient id="appIconGreen" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#b2dfb0"/>
+        <stop offset="100%" stop-color="#8bc78a"/>
+      </linearGradient>
+    </defs>
+    <rect x="5" y="5" width="90" height="90" rx="24" fill="url(#appIconBg)"/>
+    <line x1="36" y1="26" x2="30" y2="16" stroke="#b2dfb0" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="64" y1="26" x2="70" y2="16" stroke="#b2dfb0" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="30" cy="16" r="3" fill="#b2dfb0"/>
+    <circle cx="70" cy="16" r="3" fill="#b2dfb0"/>
+    <path d="M 24 44 Q 24 28 50 28 Q 76 28 76 44 L 76 54 L 24 54 Z" fill="url(#appIconGreen)"/>
+    <ellipse cx="22" cy="46" rx="3" ry="5" fill="#b2dfb0"/>
+    <ellipse cx="78" cy="46" rx="3" ry="5" fill="#b2dfb0"/>
+    <circle cx="40" cy="42" r="3.5" fill="#1a1a1a"/>
+    <circle cx="60" cy="42" r="3.5" fill="#1a1a1a"/>
+    <circle cx="39" cy="41" r="1.2" fill="#ffffff"/>
+    <circle cx="59" cy="41" r="1.2" fill="#ffffff"/>
+    <rect x="26" y="48" width="48" height="4" fill="#ffffff" rx="1"/>
+    <path d="M 30 60 L 70 60 L 70 82 Q 70 84 68 84 L 32 84 Q 30 84 30 82 Z" fill="url(#appIconGreen)"/>
+    <line x1="36" y1="70" x2="36" y2="80" stroke="#6faf6e" stroke-width="2" stroke-linecap="round"/>
+    <line x1="44" y1="70" x2="44" y2="80" stroke="#6faf6e" stroke-width="2" stroke-linecap="round"/>
+    <line x1="56" y1="70" x2="56" y2="80" stroke="#6faf6e" stroke-width="2" stroke-linecap="round"/>
+    <line x1="64" y1="70" x2="64" y2="80" stroke="#6faf6e" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+  <h1>
+    AntiSplit <span>X</span>
+    <button class="copy-btn" id="copyBtn" title="Copy link">🔗</button>
+  </h1>
+  <div class="subtitle">arm64-v8a &nbsp;|&nbsp; 64bit</div>
+  <div class="views-badge" id="viewsBadge">
+    <span class="views-icon">👁️</span>
+    <span class="views-num" id="viewCount">...</span>
+    <span class="views-label" data-i18n="viewsLabel">просмотров</span>
+  </div>
+</header>
+
+<section class="panel">
+  <h2 data-i18n="heroTitle">О приложении</h2>
+  <p data-i18n="heroText">Мощный анти-сплит мергер и патчер для Android.</p>
+  <div class="stats">
+    <div class="stat"><div class="val">1.9-3565_rc6</div><div class="lbl">Version</div></div>
+    <div class="stat"><div class="val">MPTools 2.58</div><div class="lbl">Engine</div></div>
+    <div class="stat"><div class="val">KitCore 3.4</div><div class="lbl">Core</div></div>
+    <div class="stat"><div class="val">arm64-v8a</div><div class="lbl">Arch</div></div>
+  </div>
+</section>
+
+<section class="panel">
+  <h2 data-i18n="whatTitle">Что это такое?</h2>
+  <p data-i18n="whatP1"></p>
+  <p data-i18n="whatP2"></p>
+  <div>
+    <span class="badge">arm64-v8a</span>
+    <span class="badge">64-bit</span>
+    <span class="badge">Android 13+</span>
+    <span class="badge">MPTools</span>
+    <span class="badge">KitCore</span>
+    <span class="badge">Alignment V2</span>
+  </div>
+</section>
+
+<section class="panel">
+  <h2 data-i18n="featTitle">Основные возможности</h2>
+  <div class="features">
+    <div class="feature"><div class="icon">📦</div><h3>Select Split APK</h3><p data-i18n="feat1d"></p></div>
+    <div class="feature"><div class="icon">📁</div><h3>Select APK from device</h3><p data-i18n="feat2d"></p></div>
+    <div class="feature"><div class="icon">✏️</div><h3>APK Editor</h3><p data-i18n="feat3d"></p></div>
+    <div class="feature"><div class="icon">📋</div><h3>Build history</h3><p data-i18n="feat4d"></p></div>
+  </div>
+</section>
+
+<section class="panel">
+  <h2 data-i18n="patchTitle">Патчер — убиваем всё лишнее</h2>
+  <div class="search-wrap">
+    <input class="search" id="searchInput" type="text" placeholder="Search patches..." data-i18n-ph="searchPh">
+  </div>
+  <div class="features" id="patchGrid">
+    <div class="feature"><div class="icon">🚫</div><h3>Remove Ads</h3><p data-i18n="removeAds_d"></p></div>
+    <div class="feature"><div class="icon">🛰️</div><h3>Kill Trackers</h3><p data-i18n="killTrackers_d"></p></div>
+    <div class="feature"><div class="icon">🎭</div><h3>Remove Ads V2</h3><p data-i18n="removeAdsV2_d"></p></div>
+    <div class="feature"><div class="icon">🛡️</div><h3>No Pinning</h3><p data-i18n="noPinning_d"></p></div>
+    <div class="feature"><div class="icon">⚠️</div><h3>Root Bypass</h3><p data-i18n="rootBypass_d"></p></div>
+    <div class="feature"><div class="icon">🔔</div><h3>No Update Nag</h3><p data-i18n="noUpdate_d"></p></div>
+    <div class="feature"><div class="icon">🔑</div><h3>License Killer</h3><p data-i18n="licenseKiller_d"></p></div>
+    <div class="feature"><div class="icon">⚙️</div><h3>Crash Logger 1.0</h3><p data-i18n="crashLogger_d"></p></div>
+    <div class="feature"><div class="icon">✒️</div><h3>Sign APK</h3><p data-i18n="signApk_d"></p></div>
+  </div>
+  <div class="no-results" id="noResults" data-i18n="noResults">Ничего не найдено 😕</div>
+</section>
+
+<section class="panel">
+  <h2 data-i18n="roadmapTitle">План развития</h2>
+  <p data-i18n="roadmapDesc" style="color:var(--text-dim);font-size:.9em;margin-bottom:20px;">
+    Что уже готово и что в разработке.
+  </p>
+  <div class="roadmap-item">
+    <div class="roadmap-head">
+      <span data-i18n="rm1">Мергер split APK</span>
+      <span class="rm-status done" data-i18n="rmDone">Готово</span>
+    </div>
+    <div class="roadmap-bar"><div class="roadmap-fill" style="--w:100%"></div></div>
+  </div>
+  <div class="roadmap-item">
+    <div class="roadmap-head">
+      <span data-i18n="rm2">Патчер (9 модулей)</span>
+      <span class="rm-status done" data-i18n="rmDone">Готово</span>
+    </div>
+    <div class="roadmap-bar"><div class="roadmap-fill" style="--w:100%"></div></div>
+  </div>
+  <div class="roadmap-item">
+    <div class="roadmap-head">
+      <span data-i18n="rm3">APK Editor</span>
+      <span class="rm-status dev" data-i18n="rmDev">В работе</span>
+    </div>
+    <div class="roadmap-bar"><div class="roadmap-fill" style="--w:45%"></div></div>
+  </div>
+  <div class="roadmap-item">
+    <div class="roadmap-head">
+      <span data-i18n="rm4">Мультиязычный интерфейс</span>
+      <span class="rm-status done" data-i18n="rmDone">Готово</span>
+    </div>
+    <div class="roadmap-bar"><div class="roadmap-fill" style="--w:100%"></div></div>
+  </div>
+  <div class="roadmap-item">
+    <div class="roadmap-head">
+      <span data-i18n="rm5">Свой движок сжатия</span>
+      <span class="rm-status plan" data-i18n="rmPlan">В планах</span>
+    </div>
+    <div class="roadmap-bar"><div class="roadmap-fill" style="--w:10%"></div></div>
+  </div>
+</section>
+
+<section class="panel">
+  <h2 data-i18n="faqTitle">FAQ</h2>
+  <div class="faq-item">
+    <div class="faq-q" data-i18n="faq1q">Что такое split APK?</div>
+    <div class="faq-a"><div class="faq-a-inner" data-i18n="faq1a"></div></div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" data-i18n="faq2q">Это безопасно?</div>
+    <div class="faq-a"><div class="faq-a-inner" data-i18n="faq2a"></div></div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" data-i18n="faq3q">Нужен ли root?</div>
+    <div class="faq-a"><div class="faq-a-inner" data-i18n="faq3a"></div></div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" data-i18n="faq4q">Какие архитектуры поддерживаются?</div>
+    <div class="faq-a"><div class="faq-a-inner" data-i18n="faq4a"></div></div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" data-i18n="faq5q">Зачем нужен AntiSplit X?</div>
+    <div class="faq-a"><div class="faq-a-inner" data-i18n="faq5a"></div></div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" data-i18n="faq6q">Работает ли на старых версиях Android?</div>
+    <div class="faq-a"><div class="faq-a-inner" data-i18n="faq6a"></div></div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" data-i18n="faq7q">Как часто выходят обновления?</div>
+    <div class="faq-a"><div class="faq-a-inner" data-i18n="faq7a"></div></div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" data-i18n="faq8q">Можно ли патчить системные приложения?</div>
+    <div class="faq-a"><div class="faq-a-inner" data-i18n="faq8a"></div></div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" data-i18n="faq9q">Что делать, если патч не сработал?</div>
+    <div class="faq-a"><div class="faq-a-inner" data-i18n="faq9a"></div></div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" data-i18n="faq10q">Это легально?</div>
+    <div class="faq-a"><div class="faq-a-inner" data-i18n="faq10a"></div></div>
+  </div>
+</section>
+
+<section class="panel">
+  <h2 data-i18n="changelogTitle">Changelog</h2>
+  <div class="change-item">
+    <div class="change-ver">1.9-3565_rc6</div>
+    <div class="change-desc" data-i18n="ch1"></div>
+  </div>
+</section>
+
+<section class="panel" style="text-align:center;">
+  <button class="download-btn" id="downloadBtn">
+    <span class="dl-icon">⬇️</span>
+    <span>
+      <span class="dl-title" data-i18n="dlTitle">Скачать последнюю версию</span>
+      <span class="dl-sub">AntiSplit X · 1.9-3565_rc6 · arm64-v8a</span>
+    </span>
+  </button>
+  <p style="font-size:.82em;color:var(--text-dim);margin-top:14px;" data-i18n="dlNote">
+    Файл хостится на MediaFire. Проверяй контрольную сумму перед установкой.
+  </p>
+</section>
+
+<section class="panel">
+  <h2 data-i18n="devSectionTitle">Разработчик</h2>
+  <div class="dev-header">
+    <div class="dev-avatar">
+      <svg viewBox="0 0 120 120" width="72" height="72" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="androidBody" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="55%" stop-color="#f0f7f6"/>
+            <stop offset="100%" stop-color="#d8ebe8"/>
+          </linearGradient>
+          <linearGradient id="androidShine" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+          </linearGradient>
+          <radialGradient id="androidEye" cx="50%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#1a8f7f"/>
+            <stop offset="100%" stop-color="#003d34"/>
+          </radialGradient>
+          <radialGradient id="androidShadow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#000" stop-opacity="0.25"/>
+            <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="androidInnerShadow" cx="50%" cy="100%" r="70%">
+            <stop offset="60%" stop-color="#000" stop-opacity="0"/>
+            <stop offset="100%" stop-color="#00897b" stop-opacity="0.25"/>
+          </radialGradient>
+          <filter id="androidGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="1.5" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <ellipse cx="60" cy="106" rx="26" ry="4" fill="url(#androidShadow)"/>
+        <line x1="44" y1="38" x2="28" y2="18" stroke="#e8f3f1" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="76" y1="38" x2="92" y2="18" stroke="#e8f3f1" stroke-width="4.5" stroke-linecap="round"/>
+        <circle cx="28" cy="18" r="3.5" fill="#ffffff"/>
+        <circle cx="92" cy="18" r="3.5" fill="#ffffff"/>
+        <circle cx="28" cy="18" r="1.5" fill="#b8d8d4"/>
+        <circle cx="92" cy="18" r="1.5" fill="#b8d8d4"/>
+        <path d="M 22 62 Q 22 30 60 30 Q 98 30 98 62 L 98 74 Q 98 82 90 82 L 30 82 Q 22 82 22 74 Z"
+              fill="url(#androidBody)" filter="url(#androidGlow)"/>
+        <path d="M 22 62 Q 22 30 60 30 Q 98 30 98 62 L 98 74 Q 98 82 90 82 L 30 82 Q 22 82 22 74 Z"
+              fill="url(#androidInnerShadow)"/>
+        <path d="M 30 46 Q 30 36 60 36 Q 85 36 88 46 Q 82 42 60 42 Q 36 42 30 46 Z"
+              fill="url(#androidShine)" opacity="0.8"/>
+        <circle cx="46" cy="58" r="5" fill="url(#androidEye)"/>
+        <circle cx="74" cy="58" r="5" fill="url(#androidEye)"/>
+        <circle cx="44.5" cy="56.5" r="1.6" fill="#ffffff" opacity="0.9"/>
+        <circle cx="72.5" cy="56.5" r="1.6" fill="#ffffff" opacity="0.9"/>
+        <circle cx="46" cy="58" r="5" fill="none" stroke="#00b39a" stroke-width="0.6" opacity="0.5"/>
+        <circle cx="74" cy="58" r="5" fill="none" stroke="#00b39a" stroke-width="0.6" opacity="0.5"/>
+      </svg>
+    </div>
+    <div class="dev-info">
+      <div class="dev-name">Magic HJ</div>
+      <div class="dev-role" data-i18n="devRole">Android Developer · Reverse Engineer</div>
+      <div class="dev-tags">
+        <span class="dev-tag">Android</span>
+        <span class="dev-tag">Kotlin</span>
+        <span class="dev-tag">Java</span>
+        <span class="dev-tag">Smali</span>
+        <span class="dev-tag">APK Tools</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="dev-bio" data-i18n="devBio"></p>
+  <div class="dev-stats">
+    <div class="dev-stat"><div class="v">7+</div><div class="l" data-i18n="devYears">лет опыта</div></div>
+    <div class="dev-stat"><div class="v">15+</div><div class="l" data-i18n="devProjects">проектов</div></div>
+    <div class="dev-stat"><div class="v">🇺🇦</div><div class="l" data-i18n="devFrom">Украина</div></div>
+    <div class="dev-stat"><div class="v">24/7</div><div class="l" data-i18n="devCoffee">на кофе</div></div>
+  </div>
+  <p class="dev-bio" data-i18n="devBio2"></p>
+
+  <div class="dev-contacts">
+    <a class="dev-contact" href="#" onclick="return false;"><span>💻</span>GitHub</a>
+    <a class="dev-contact" href="#" onclick="return false;"><span>✈️</span>Telegram</a>
+    <a class="dev-contact" href="#" onclick="return false;"><span>📧</span>Email</a>
+    <a class="dev-contact" href="#" onclick="return false;"><span>▶️</span>YouTube</a>
+  </div>
+
+  <div class="dev-quote">
+    <span data-i18n="devQuote">"Код должен быть чистым, а APK — целым. Ненавижу split-мусор и рекламу в приложениях."</span>
+  </div>
+</section>
+
+<footer>
+  <p data-i18n="footerText">AntiSplit X © 2026 · Сделано с любовью для Android-комьюнити</p>
+</footer>
+
+<div class="dl-overlay" id="dlOverlay">
+  <div class="dl-overlay-inner">
+    <button class="dl-close" id="dlClose">✕</button>
+    <div class="dl-ad-label">SPONSORED</div>
+    <div class="dl-ad">
+      <div class="dl-ad-icon">🎮</div>
+      <div class="dl-ad-content">
+        <div class="dl-ad-title">Mega Merge Saga</div>
+        <div class="dl-ad-desc">Собери свою империю! 10 млн загрузок. Играй бесплатно.</div>
+        <button class="dl-ad-btn" onclick="return false;">Установить</button>
+      </div>
+    </div>
+    <div class="dl-progress-wrap">
+      <div class="dl-progress-label">
+        <span data-i18n="dlPreparing">Подготовка ссылки...</span>
+        <span id="dlTimer">15</span>
+      </div>
+      <div class="dl-progress-bar">
+        <div class="dl-progress-fill" id="dlProgress"></div>
+      </div>
+    </div>
+    <div class="dl-final" id="dlFinal">
+      <div class="dl-ready-icon">✅</div>
+      <div class="dl-ready-title" data-i18n="dlReady">Ссылка готова!</div>
+      <div class="dl-ready-sub">AntiSplit X 1.9-3565_rc6 · 8.4 MB</div>
+      <a class="dl-final-btn" id="dlFinalBtn" href="#" target="_blank" rel="noopener">
+        <span>⬇️</span>
+        <span data-i18n="dlDownload">Download</span>
+      </a>
+      <div class="dl-final-note" data-i18n="dlFinalNote">
+        Файл откроется на MediaFire в новой вкладке
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const i18n = {
+  ru: { name: "Русский",
+    viewsLabel: "просмотров",
+    heroTitle: "О приложении",
+    heroText: "Мощный анти-сплит мергер и патчер для Android. Собирает split APK в один файл и позволяет гибко чистить приложения от лишнего.",
+    whatTitle: "Что это такое?",
+    whatP1: "<strong>AntiSplit X</strong> — это мощный анти-сплит мергер для Android, который собирает разбитые (split) APK обратно в один цельный APK-файл. Больше никаких папок с кучей <code>base.apk</code> и <code>config.arm64_v8a.apk</code> — всё в одном файле.",
+    whatP2: "Внутри — движок <strong>MPTools 2.58.00</strong> и <strong>KitCore 3.4</strong>, поддержка <strong>Alignment V2 merge</strong>. Работает быстро, стабильно и без лишнего мусора.",
+    featTitle: "Основные возможности",
+    feat1d: "Собирает приложения прямо из установленных на устройстве.",
+    feat2d: "Загрузка APK-файлов из памяти телефона.",
+    feat3d: "Редактирование манифеста и ресурсов (скоро).",
+    feat4d: "Установка, отправка и удаление готовых сборок.",
+    patchTitle: "Патчер — убиваем всё лишнее",
+    removeAds_d: "Отключает загрузку и показ рекламы в коде приложения.",
+    killTrackers_d: "Режет аналитику, трекер-URL и спам в логах.",
+    removeAdsV2_d: "Реклама думает, что оффлайн — приложение работает.",
+    noPinning_d: "Обход cert pinning (только для исследований).",
+    rootBypass_d: "RootBeer и компания думают, что рута нет.",
+    noUpdate_d: "Убирает навязчивые просьбы обновиться.",
+    licenseKiller_d: "Force allow, если есть проверка лицензии.",
+    crashLogger_d: "Ловит краши: лог + рестарт вместо закрытия.",
+    signApk_d: "Обязательная подпись для установки на обычный Android.",
+    footerText: "AntiSplit X © 2026 · Сделано с любовью для Android-комьюнити",
+    searchPh: "Поиск по патчам...",
+    noResults: "Ничего не найдено 😕",
+    faqTitle: "Частые вопросы",
+    faq1q: "Что такое split APK?",
+    faq1a: "Split APK — это когда приложение разбито на несколько APK-файлов: base + config + части для разных архитектур и языков. AntiSplit X склеивает их в один.",
+    faq2q: "Это безопасно?",
+    faq2a: "Да, приложение работает локально на устройстве и ничего никуда не отправляет. Патчи применяются только к выбранным APK.",
+    faq3q: "Нужен ли root?",
+    faq3a: "Нет. AntiSplit X работает без root. Root нужен только для некоторых специфических сценариев.",
+    faq4q: "Какие архитектуры поддерживаются?",
+    faq4a: "Основная цель — arm64-v8a (64-bit). Но мергер также умеет работать с armeabi-v7a и x86_64.",
+    faq5q: "Зачем нужен AntiSplit X?",
+    faq5a: "Чтобы превратить split-приложение в один APK — удобно для бэкапов, установки на другие устройства или для дальнейшего патчинга.",
+    faq6q: "Работает ли на старых версиях Android?",
+    faq6a: "Основная поддержка — Android 8 и выше. На Android 13+ работает идеально, включая последние версии.",
+    faq7q: "Как часто выходят обновления?",
+    faq7a: "Обычно раз в 2–4 недели. Крупные фичи анонсируются в Telegram-канале разработчика.",
+    faq8q: "Можно ли патчить системные приложения?",
+    faq8a: "Технически да, но для установки обратно потребуется root или подпись совпадающая с системной. Обычные APK патчатся без проблем.",
+    faq9q: "Что делать, если патч не сработал?",
+    faq9a: "Попробуй другой метод патча, обнови приложение до последней версии или напиши разработчику — он отвечает лично.",
+    faq10q: "Это легально?",
+    faq10a: "Инструмент предназначен для исследования, бэкапов и личного использования. Ответственность за применение — на пользователе.",
+    changelogTitle: "История версий",
+    ch1: "Улучшен движок Merge, обновлён MPTools до 2.58.00, добавлен Crash Logger, повышена стабильность слияния split APK.",
+    roadmapTitle: "План развития",
+    roadmapDesc: "Что уже готово и что в разработке.",
+    rm1: "Мергер split APK",
+    rm2: "Патчер (9 модулей)",
+    rm3: "APK Editor",
+    rm4: "Мультиязычный интерфейс",
+    rm5: "Свой движок сжатия",
+    rmDone: "Готово",
+    rmDev: "В работе",
+    rmPlan: "В планах",
+    devSectionTitle: "Разработчик",
+    devRole: "Android Developer · Reverse Engineer",
+    devBio: "Magic HJ — независимый разработчик из Киева, Украина. Более 7 лет изучает Android изнутри: реверс-инжиниринг, сборку APK, работу с smali и нативным кодом. Начинал с простых модов, а сегодня делает собственные инструменты, которыми пользуются тысячи людей.",
+    devBio2: "Помимо AntiSplit X, он ведёт блог о реверс-инжиниринге, помогает новичкам в сообществах и постоянно пилит что-то новое. Любит крепкий кофе, ретро-игры и когда APK после мерджа всё ещё запускается с первого раза.",
+    devYears: "лет опыта",
+    devProjects: "проектов",
+    devFrom: "Украина",
+    devCoffee: "на кофе",
+    devQuote: "\"Код должен быть чистым, а APK — целым. Ненавижу split-мусор и рекламу в приложениях.\"",
+    dlTitle: "Скачать последнюю версию",
+    dlNote: "Файл хостится на MediaFire. Проверяй контрольную сумму перед установкой.",
+    dlPreparing: "Подготовка ссылки...",
+    dlReady: "Ссылка готова!",
+    dlDownload: "Download",
+    dlFinalNote: "Файл откроется на MediaFire в новой вкладке"
+  },
+  en: { name: "English",
+    viewsLabel: "views",
+    heroTitle: "About the app",
+    heroText: "A powerful anti-split merger and patcher for Android. Merges split APKs into a single file and lets you flexibly clean apps from junk.",
+    whatTitle: "What is it?",
+    whatP1: "<strong>AntiSplit X</strong> is a powerful anti-split merger for Android that reassembles split APKs back into a single APK file. No more folders full of <code>base.apk</code> and <code>config.arm64_v8a.apk</code> — everything in one file.",
+    whatP2: "Inside — <strong>MPTools 2.58.00</strong> and <strong>KitCore 3.4</strong> engine, with <strong>Alignment V2 merge</strong> support. Fast, stable and clean.",
+    featTitle: "Main features",
+    feat1d: "Merges apps directly from those installed on your device.",
+    feat2d: "Load APK files from your phone's storage.",
+    feat3d: "Edit manifest & resources (coming soon).",
+    feat4d: "Install, share and delete ready builds.",
+    patchTitle: "Patcher — kill everything extra",
+    removeAds_d: "Disables ad loading & showing in app code.",
+    killTrackers_d: "Cuts analytics, tracker URLs and log spam.",
+    removeAdsV2_d: "Ads think they're offline — app keeps working.",
+    noPinning_d: "Bypass cert pinning (research only).",
+    rootBypass_d: "RootBeer & co think there's no root.",
+    noUpdate_d: "Removes forced update & review prompts.",
+    licenseKiller_d: "Force allow if a license check exists.",
+    crashLogger_d: "Catches crashes: log + restart, not close.",
+    signApk_d: "Required to install on normal Android.",
+    footerText: "AntiSplit X © 2026 · Made with love for the Android community",
+    searchPh: "Search patches...",
+    noResults: "Nothing found 😕",
+    faqTitle: "FAQ",
+    faq1q: "What is a split APK?",
+    faq1a: "A split APK is when an app is divided into several APK files: base + config + parts for different architectures and languages. AntiSplit X glues them together into one.",
+    faq2q: "Is it safe?",
+    faq2a: "Yes, the app works locally on your device and sends nothing anywhere. Patches are only applied to selected APKs.",
+    faq3q: "Do I need root?",
+    faq3a: "No. AntiSplit X works without root. Root is only needed for some specific scenarios.",
+    faq4q: "Which architectures are supported?",
+    faq4a: "The main target is arm64-v8a (64-bit). The merger also handles armeabi-v7a and x86_64.",
+    faq5q: "Why do I need AntiSplit X?",
+    faq5a: "To turn a split app into a single APK — handy for backups, installing on other devices, or further patching.",
+    faq6q: "Does it work on older Android versions?",
+    faq6a: "Main support is Android 8 and above. On Android 13+ it works perfectly, including the latest versions.",
+    faq7q: "How often are updates released?",
+    faq7a: "Usually every 2–4 weeks. Major features are announced in the developer's Telegram channel.",
+    faq8q: "Can I patch system apps?",
+    faq8a: "Technically yes, but installing them back requires root or a matching system signature. Regular APKs patch without issues.",
+    faq9q: "What if the patch didn't work?",
+    faq9a: "Try another patch method, update to the latest version, or message the developer — he replies personally.",
+    faq10q: "Is this legal?",
+    faq10a: "The tool is intended for research, backups and personal use. Responsibility for application lies with the user.",
+    changelogTitle: "Changelog",
+    ch1: "Improved merge engine, updated MPTools to 2.58.00, added Crash Logger, increased split APK merge stability.",
+    roadmapTitle: "Roadmap",
+    roadmapDesc: "What's done and what's in progress.",
+    rm1: "Split APK merger",
+    rm2: "Patcher (9 modules)",
+    rm3: "APK Editor",
+    rm4: "Multi-language UI",
+    rm5: "Custom compression engine",
+    rmDone: "Done",
+    rmDev: "In progress",
+    rmPlan: "Planned",
+    devSectionTitle: "Developer",
+    devRole: "Android Developer · Reverse Engineer",
+    devBio: "Magic HJ is an independent developer from Kyiv, Ukraine. For over 7 years he's been digging deep into Android: reverse engineering, APK building, smali and native code. He started with simple mods, and today builds his own tools used by thousands of people.",
+    devBio2: "Besides AntiSplit X, he runs a blog about reverse engineering, helps newcomers in communities, and constantly builds something new. Loves strong coffee, retro games, and when a merged APK still launches on the first try.",
+    devYears: "years of experience",
+    devProjects: "projects",
+    devFrom: "Ukraine",
+    devCoffee: "on coffee",
+    devQuote: "\"Code should be clean, and APKs should be whole. I hate split junk and ads in apps.\"",
+    dlTitle: "Download latest version",
+    dlNote: "File is hosted on MediaFire. Verify the checksum before installing.",
+    dlPreparing: "Preparing link...",
+    dlReady: "Link is ready!",
+    dlDownload: "Download",
+    dlFinalNote: "File will open on MediaFire in a new tab"
+  },
+  uk: { name: "Українська", viewsLabel: "переглядів", heroTitle: "Про застосунок", heroText: "Потужний анти-спліт мергер і патчер для Android.", whatTitle: "Що це таке?", whatP1: "<strong>AntiSplit X</strong> — потужний анти-спліт мергер для Android.", whatP2: "Движок <strong>MPTools 2.58.00</strong> та <strong>KitCore 3.4</strong>.", featTitle: "Основні можливості", feat1d: "Збирає застосунки з встановлених.", feat2d: "Завантаження APK з пам'яті телефона.", feat3d: "Редагування манифесту (скоро).", feat4d: "Установка, надсилання та видалення збірок.", patchTitle: "Патчер — вбиваємо все зайве", removeAds_d: "Вимикає рекламу в коді застосунку.", killTrackers_d: "Ріже аналітику, трекери та спам.", removeAdsV2_d: "Реклама думає, що офлайн.", noPinning_d: "Обхід cert pinning.", rootBypass_d: "RootBeer думає, що рута немає.", noUpdate_d: "Прибирає нав'язливі оновлення.", licenseKiller_d: "Force allow для ліцензії.", crashLogger_d: "Ловить краші: лог + рестарт.", signApk_d: "Обов'язковий підпис.", footerText: "AntiSplit X © 2026 · Для Android-спільноти", searchPh: "Пошук по патчах...", noResults: "Нічого не знайдено 😕", faqTitle: "Часті питання", faq1q: "Що таке split APK?", faq1a: "Це коли застосунок розбитий на декілька APK.", faq2q: "Це безпечно?", faq2a: "Так, працює локально.", faq3q: "Потрібен root?", faq3a: "Ні, працює без root.", faq4q: "Які архітектури?", faq4a: "arm64-v8a, armeabi-v7a, x86_64.", faq5q: "Навіщо AntiSplit X?", faq5a: "Щоб зробити один APK зі split.", faq6q: "Працює на старих Android?", faq6a: "Так, від Android 8.", faq7q: "Як часто оновлення?", faq7a: "Раз на 2-4 тижні.", faq8q: "Можна патчити системні?", faq8a: "Так, але потрібен root.", faq9q: "Патч не спрацював?", faq9a: "Спробуй інший метод або напиши розробнику.", faq10q: "Це легально?", faq10a: "Для досліджень та особистого використання.", changelogTitle: "Історія версій", ch1: "Оновлено MPTools до 2.58.00, додано Crash Logger.", roadmapTitle: "План розвитку", roadmapDesc: "Що готово і що в розробці.", rm1: "Мергер split APK", rm2: "Патчер (9 модулів)", rm3: "APK Editor", rm4: "Багатомовний інтерфейс", rm5: "Свій движок стиснення", rmDone: "Готово", rmDev: "В роботі", rmPlan: "У планах", devSectionTitle: "Розробник", devRole: "Android Developer · Reverse Engineer", devBio: "Magic HJ — незалежний розробник з Києва, Україна. Понад 7 років вивчає Android зсередини.", devBio2: "Окрім AntiSplit X, він веде блог про реверс-інжиніринг і допомагає новачкам.", devYears: "років досвіду", devProjects: "проєктів", devFrom: "Україна", devCoffee: "на каві", devQuote: "\"Код має бути чистим, а APK — цілим.\"", dlTitle: "Завантажити останню версію", dlNote: "Файл на MediaFire. Перевіряй контрольну суму.", dlPreparing: "Підготовка посилання...", dlReady: "Посилання готове!", dlDownload: "Download", dlFinalNote: "Файл відкриється на MediaFire у новій вкладці" },
+  pl: { name: "Polski", viewsLabel: "wyświetleń", heroTitle: "O aplikacji", heroText: "Potężny anty-split merger.", whatTitle: "Co to jest?", whatP1: "<strong>AntiSplit X</strong> scala split APK.", whatP2: "Silnik <strong>MPTools</strong> i <strong>KitCore</strong>.", featTitle: "Funkcje", feat1d: "Scala zainstalowane aplikacje.", feat2d: "Ładuj APK.", feat3d: "Edycja manifestu.", feat4d: "Zarządzaj buildami.", patchTitle: "Patcher", removeAds_d: "Wyłącza reklamy.", killTrackers_d: "Tnie trackery.", removeAdsV2_d: "Reklamy offline.", noPinning_d: "Bypass pinning.", rootBypass_d: "Bez roota.", noUpdate_d: "Bez wymuszonych aktualizacji.", licenseKiller_d: "Force allow.", crashLogger_d: "Łapie crashe.", signApk_d: "Wymagany podpis.", footerText: "AntiSplit X © 2026 · Społeczność Androida", searchPh: "Szukaj...", noResults: "Nic nie znaleziono 😕", faqTitle: "FAQ", faq1q: "Co to split APK?", faq1a: "Podzielone APK.", faq2q: "Bezpieczne?", faq2a: "Tak, lokalnie.", faq3q: "Root?", faq3a: "Nie.", faq4q: "Architektury?", faq4a: "arm64-v8a.", faq5q: "Po co?", faq5a: "By połączyć split w jeden APK.", faq6q: "Starsze Android?", faq6a: "Tak, od Android 8.", faq7q: "Aktualizacje?", faq7a: "Co 2-4 tygodnie.", faq8q: "Systemowe?", faq8a: "Tak, z rootem.", faq9q: "Patch nie działa?", faq9a: "Spróbuj innej metody.", faq10q: "Legalne?", faq10a: "Do badań i użytku osobistego.", changelogTitle: "Historia", ch1: "Nowy MPTools i Crash Logger.", roadmapTitle: "Plan", roadmapDesc: "Gotowe i w toku.", rm1: "Merger APK", rm2: "Patcher (9)", rm3: "APK Editor", rm4: "Wielojęzyczność", rm5: "Silnik kompresji", rmDone: "Gotowe", rmDev: "W toku", rmPlan: "Planowane", devSectionTitle: "Deweloper", devRole: "Android Developer · Reverse Engineer", devBio: "Magic HJ to niezależny deweloper z Kijowa na Ukrainie. Od ponad 7 lat zgłębia Androida.", devBio2: "Poza AntiSplit X prowadzi bloga o reverse engineeringu.", devYears: "lat doświadczenia", devProjects: "projektów", devFrom: "Ukraina", devCoffee: "na kawie", devQuote: "\"Kod ma być czysty, a APK — cały.\"", dlTitle: "Pobierz najnowszą wersję", dlNote: "Plik na MediaFire.", dlPreparing: "Przygotowywanie linku...", dlReady: "Link gotowy!", dlDownload: "Download", dlFinalNote: "Plik otworzy się na MediaFire w nowej karcie" },
+  de: { name: "Deutsch", viewsLabel: "Aufrufe", heroTitle: "Über die App", heroText: "Anti-Split-Merger für Android.", whatTitle: "Was ist das?", whatP1: "<strong>AntiSplit X</strong> führt Split-APKs zusammen.", whatP2: "<strong>MPTools</strong> und <strong>KitCore</strong>.", featTitle: "Funktionen", feat1d: "Apps zusammenführen.", feat2d: "APK laden.", feat3d: "Manifest bearbeiten.", feat4d: "Builds verwalten.", patchTitle: "Patcher", removeAds_d: "Werbung aus.", killTrackers_d: "Tracker kappen.", removeAdsV2_d: "Ads offline.", noPinning_d: "Pinning bypass.", rootBypass_d: "Kein Root.", noUpdate_d: "Keine Updates.", licenseKiller_d: "Force allow.", crashLogger_d: "Fängt Crashes.", signApk_d: "Signatur nötig.", footerText: "AntiSplit X © 2026 · Android-Community", searchPh: "Suchen...", noResults: "Nichts gefunden 😕", faqTitle: "FAQ", faq1q: "Split APK?", faq1a: "Geteilte APK.", faq2q: "Sicher?", faq2a: "Ja, lokal.", faq3q: "Root?", faq3a: "Nein.", faq4q: "Architekturen?", faq4a: "arm64-v8a.", faq5q: "Wozu?", faq5a: "Split in eine APK umwandeln.", faq6q: "Alte Android?", faq6a: "Ab Android 8.", faq7q: "Updates?", faq7a: "Alle 2-4 Wochen.", faq8q: "System-Apps?", faq8a: "Mit Root.", faq9q: "Patch fehlgeschlagen?", faq9a: "Andere Methode probieren.", faq10q: "Legal?", faq10a: "Für Forschung und persönlichen Gebrauch.", changelogTitle: "Changelog", ch1: "MPTools Update, Crash Logger.", roadmapTitle: "Roadmap", roadmapDesc: "Fertig und geplant.", rm1: "APK-Merger", rm2: "Patcher (9)", rm3: "APK Editor", rm4: "Mehrsprachig", rm5: "Eigene Engine", rmDone: "Fertig", rmDev: "In Arbeit", rmPlan: "Geplant", devSectionTitle: "Entwickler", devRole: "Android Developer · Reverse Engineer", devBio: "Magic HJ ist ein unabhängiger Entwickler aus Kiew, Ukraine. Seit über 7 Jahren beschäftigt er sich mit Android.", devBio2: "Neben AntiSplit X betreibt er einen Blog über Reverse Engineering.", devYears: "Jahre Erfahrung", devProjects: "Projekte", devFrom: "Ukraine", devCoffee: "auf Kaffee", devQuote: "\"Code soll sauber sein, und APKs ganz.\"", dlTitle: "Neueste Version herunterladen", dlNote: "Datei wird auf MediaFire gehostet.", dlPreparing: "Link wird vorbereitet...", dlReady: "Link ist bereit!", dlDownload: "Download", dlFinalNote: "Datei öffnet sich auf MediaFire in neuem Tab" },
+  fr: { name: "Français", viewsLabel: "vues", heroTitle: "À propos", heroText: "Anti-split merger Android.", whatTitle: "C'est quoi ?", whatP1: "<strong>AntiSplit X</strong> fusionne les APK.", whatP2: "<strong>MPTools</strong> et <strong>KitCore</strong>.", featTitle: "Fonctions", feat1d: "Fusionner les apps.", feat2d: "Charger des APK.", feat3d: "Éditer manifeste.", feat4d: "Gérer les builds.", patchTitle: "Patcher", removeAds_d: "Désactive pubs.", killTrackers_d: "Coupe trackers.", removeAdsV2_d: "Pubs offline.", noPinning_d: "Bypass pinning.", rootBypass_d: "Pas de root.", noUpdate_d: "Pas de MAJ.", licenseKiller_d: "Force allow.", crashLogger_d: "Capture crashs.", signApk_d: "Signature.", footerText: "AntiSplit X © 2026 · Communauté Android", searchPh: "Rechercher...", noResults: "Rien trouvé 😕", faqTitle: "FAQ", faq1q: "Split APK ?", faq1a: "APK divisé.", faq2q: "Sûr ?", faq2a: "Oui, local.", faq3q: "Root ?", faq3a: "Non.", faq4q: "Architectures ?", faq4a: "arm64-v8a.", faq5q: "Pourquoi ?", faq5a: "Fusionner split en un APK.", faq6q: "Anciens Android ?", faq6a: "Depuis Android 8.", faq7q: "Mises à jour ?", faq7a: "Toutes les 2-4 semaines.", faq8q: "Apps système ?", faq8a: "Avec root.", faq9q: "Patch échoué ?", faq9a: "Essaie autre méthode.", faq10q: "Légal ?", faq10a: "Recherche et usage personnel.", changelogTitle: "Changelog", ch1: "MPTools mis à jour, Crash Logger.", roadmapTitle: "Feuille de route", roadmapDesc: "Fait et en cours.", rm1: "Merger APK", rm2: "Patcher (9)", rm3: "APK Editor", rm4: "Multi-langues", rm5: "Moteur de compression", rmDone: "Fait", rmDev: "En cours", rmPlan: "Prévu", devSectionTitle: "Développeur", devRole: "Android Developer · Reverse Engineer", devBio: "Magic HJ est un développeur indépendant de Kyiv, Ukraine. Depuis plus de 7 ans il explore Android.", devBio2: "En plus d'AntiSplit X, il tient un blog sur le reverse engineering.", devYears: "ans d'expérience", devProjects: "projets", devFrom: "Ukraine", devCoffee: "sur café", devQuote: "\"Le code doit être propre, et les APK entiers.\"", dlTitle: "Télécharger la dernière version", dlNote: "Fichier hébergé sur MediaFire.", dlPreparing: "Préparation du lien...", dlReady: "Lien prêt !", dlDownload: "Download", dlFinalNote: "Le fichier s'ouvrira sur MediaFire dans un nouvel onglet" },
+  es: { name: "Español", viewsLabel: "visitas", heroTitle: "Sobre la app", heroText: "Anti-split merger Android.", whatTitle: "¿Qué es?", whatP1: "<strong>AntiSplit X</strong> reensambla APK.", whatP2: "<strong>MPTools</strong> y <strong>KitCore</strong>.", featTitle: "Funciones", feat1d: "Fusiona apps.", feat2d: "Cargar APK.", feat3d: "Editar manifest.", feat4d: "Gestionar builds.", patchTitle: "Patcher", removeAds_d: "Desactiva anuncios.", killTrackers_d: "Corta trackers.", removeAdsV2_d: "Anuncios offline.", noPinning_d: "Bypass pinning.", rootBypass_d: "Sin root.", noUpdate_d: "Sin actualizaciones.", licenseKiller_d: "Force allow.", crashLogger_d: "Captura crashes.", signApk_d: "Firma.", footerText: "AntiSplit X © 2026 · Comunidad Android", searchPh: "Buscar...", noResults: "Nada encontrado 😕", faqTitle: "FAQ", faq1q: "¿Split APK?", faq1a: "APK dividido.", faq2q: "¿Seguro?", faq2a: "Sí, local.", faq3q: "¿Root?", faq3a: "No.", faq4q: "¿Arquitecturas?", faq4a: "arm64-v8a.", faq5q: "¿Para qué?", faq5a: "Unir split en un APK.", faq6q: "¿Android antiguo?", faq6a: "Desde Android 8.", faq7q: "¿Actualizaciones?", faq7a: "Cada 2-4 semanas.", faq8q: "¿Apps sistema?", faq8a: "Con root.", faq9q: "¿Parche falló?", faq9a: "Prueba otro método.", faq10q: "¿Legal?", faq10a: "Investigación y uso personal.", changelogTitle: "Changelog", ch1: "MPTools actualizado, Crash Logger.", roadmapTitle: "Hoja de ruta", roadmapDesc: "Hecho y en curso.", rm1: "Merger APK", rm2: "Patcher (9)", rm3: "APK Editor", rm4: "Multi-idioma", rm5: "Motor de compresión", rmDone: "Hecho", rmDev: "En curso", rmPlan: "Planeado", devSectionTitle: "Desarrollador", devRole: "Android Developer · Reverse Engineer", devBio: "Magic HJ es un desarrollador independiente de Kyiv, Ucrania. Lleva más de 7 años explorando Android.", devBio2: "Además de AntiSplit X, mantiene un blog sobre ingeniería inversa.", devYears: "años de experiencia", devProjects: "proyectos", devFrom: "Ucrania", devCoffee: "con café", devQuote: "\"El código debe ser limpio y los APK enteros.\"", dlTitle: "Descargar última versión", dlNote: "Archivo alojado en MediaFire.", dlPreparing: "Preparando enlace...", dlReady: "¡Enlace listo!", dlDownload: "Download", dlFinalNote: "El archivo se abrirá en MediaFire en una nueva pestaña" },
+  it: { name: "Italiano", viewsLabel: "visualizzazioni", heroTitle: "Info", heroText: "Anti-split merger Android.", whatTitle: "Cos'è?", whatP1: "<strong>AntiSplit X</strong> unisce APK.", whatP2: "<strong>MPTools</strong> e <strong>KitCore</strong>.", featTitle: "Funzioni", feat1d: "Unisce app.", feat2d: "Carica APK.", feat3d: "Modifica manifest.", feat4d: "Gestisci build.", patchTitle: "Patcher", removeAds_d: "Disattiva annunci.", killTrackers_d: "Taglia tracker.", removeAdsV2_d: "Annunci offline.", noPinning_d: "Bypass pinning.", rootBypass_d: "Senza root.", noUpdate_d: "No aggiornamenti.", licenseKiller_d: "Force allow.", crashLogger_d: "Cattura crash.", signApk_d: "Firma.", footerText: "AntiSplit X © 2026 · Community Android", searchPh: "Cerca...", noResults: "Niente trovato 😕", faqTitle: "FAQ", faq1q: "Split APK?", faq1a: "APK diviso.", faq2q: "Sicuro?", faq2a: "Sì, locale.", faq3q: "Root?", faq3a: "No.", faq4q: "Architetture?", faq4a: "arm64-v8a.", faq5q: "Perché?", faq5a: "Unire split in un APK.", faq6q: "Android vecchi?", faq6a: "Da Android 8.", faq7q: "Aggiornamenti?", faq7a: "Ogni 2-4 settimane.", faq8q: "App sistema?", faq8a: "Con root.", faq9q: "Patch non funziona?", faq9a: "Prova altro metodo.", faq10q: "Legale?", faq10a: "Ricerca e uso personale.", changelogTitle: "Changelog", ch1: "MPTools aggiornato, Crash Logger.", roadmapTitle: "Roadmap", roadmapDesc: "Fatto e in corso.", rm1: "Merger APK", rm2: "Patcher (9)", rm3: "APK Editor", rm4: "Multi-lingua", rm5: "Motore compressione", rmDone: "Fatto", rmDev: "In corso", rmPlan: "Pianificato", devSectionTitle: "Sviluppatore", devRole: "Android Developer · Reverse Engineer", devBio: "Magic HJ è uno sviluppatore indipendente di Kyiv, Ucraina. Da oltre 7 anni esplora Android.", devBio2: "Oltre ad AntiSplit X, gestisce un blog sul reverse engineering.", devYears: "anni di esperienza", devProjects: "progetti", devFrom: "Ucraina", devCoffee: "sul caffè", devQuote: "\"Il codice deve essere pulito e gli APK interi.\"", dlTitle: "Scarica ultima versione", dlNote: "File ospitato su MediaFire.", dlPreparing: "Preparazione link...", dlReady: "Link pronto!", dlDownload: "Download", dlFinalNote: "Il file si aprirà su MediaFire in una nuova scheda" },
+  pt: { name: "Português", viewsLabel: "visualizações", heroTitle: "Sobre", heroText: "Anti-split merger Android.", whatTitle: "O que é?", whatP1: "<strong>AntiSplit X</strong> junta APKs.", whatP2: "<strong>MPTools</strong> e <strong>KitCore</strong>.", featTitle: "Recursos", feat1d: "Mescla apps.", feat2d: "Carregar APKs.", feat3d: "Editar manifest.", feat4d: "Gerir builds.", patchTitle: "Patcher", removeAds_d: "Desativa anúncios.", killTrackers_d: "Corta trackers.", removeAdsV2_d: "Anúncios offline.", noPinning_d: "Bypass pinning.", rootBypass_d: "Sem root.", noUpdate_d: "Sem updates.", licenseKiller_d: "Force allow.", crashLogger_d: "Captura crashes.", signApk_d: "Assinatura.", footerText: "AntiSplit X © 2026 · Comunidade Android", searchPh: "Pesquisar...", noResults: "Nada encontrado 😕", faqTitle: "FAQ", faq1q: "Split APK?", faq1a: "APK dividido.", faq2q: "Seguro?", faq2a: "Sim, local.", faq3q: "Root?", faq3a: "Não.", faq4q: "Arquiteturas?", faq4a: "arm64-v8a.", faq5q: "Por quê?", faq5a: "Unir split em um APK.", faq6q: "Android antigo?", faq6a: "Desde Android 8.", faq7q: "Atualizações?", faq7a: "Cada 2-4 semanas.", faq8q: "Apps sistema?", faq8a: "Com root.", faq9q: "Patch falhou?", faq9a: "Tente outro método.", faq10q: "Legal?", faq10a: "Pesquisa e uso pessoal.", changelogTitle: "Changelog", ch1: "MPTools atualizado, Crash Logger.", roadmapTitle: "Roadmap", roadmapDesc: "Feito e em curso.", rm1: "Merger APK", rm2: "Patcher (9)", rm3: "APK Editor", rm4: "Multi-idioma", rm5: "Motor de compressão", rmDone: "Feito", rmDev: "Em curso", rmPlan: "Planeado", devSectionTitle: "Desenvolvedor", devRole: "Android Developer · Reverse Engineer", devBio: "Magic HJ é um desenvolvedor independente de Kyiv, Ucrânia. Há mais de 7 anos explora o Android.", devBio2: "Além do AntiSplit X, mantém um blog sobre engenharia reversa.", devYears: "anos de experiência", devProjects: "projetos", devFrom: "Ucrânia", devCoffee: "no café", devQuote: "\"Código limpo, APKs inteiros.\"", dlTitle: "Baixar última versão", dlNote: "Arquivo hospedado no MediaFire.", dlPreparing: "Preparando link...", dlReady: "Link pronto!", dlDownload: "Download", dlFinalNote: "O arquivo abrirá no MediaFire em uma nova aba" },
+  tr: { name: "Türkçe", viewsLabel: "görüntüleme", heroTitle: "Uygulama hakkında", heroText: "Android için anti-split merger.", whatTitle: "Bu nedir?", whatP1: "<strong>AntiSplit X</strong> split APK'ları birleştirir.", whatP2: "<strong>MPTools</strong> ve <strong>KitCore</strong>.", featTitle: "Özellikler", feat1d: "Uygulamaları birleştir.", feat2d: "APK yükle.", feat3d: "Manifest düzenle.", feat4d: "Build'leri yönet.", patchTitle: "Patcher", removeAds_d: "Reklamları kapat.", killTrackers_d: "Tracker'ları kes.", removeAdsV2_d: "Reklamlar çevrimdışı.", noPinning_d: "Pinning bypass.", rootBypass_d: "Root yok.", noUpdate_d: "Güncelleme yok.", licenseKiller_d: "Force allow.", crashLogger_d: "Çökmeleri yakalar.", signApk_d: "İmza gerekli.", footerText: "AntiSplit X © 2026 · Android topluluğu", searchPh: "Ara...", noResults: "Bulunamadı 😕", faqTitle: "SSS", faq1q: "Split APK?", faq1a: "Bölünmüş APK.", faq2q: "Güvenli mi?", faq2a: "Evet, yerel.", faq3q: "Root?", faq3a: "Hayır.", faq4q: "Mimariler?", faq4a: "arm64-v8a.", faq5q: "Neden?", faq5a: "Split'i tek APK yapmak için.", faq6q: "Eski Android?", faq6a: "Android 8'den itibaren.", faq7q: "Güncellemeler?", faq7a: "2-4 haftada bir.", faq8q: "Sistem uygulamaları?", faq8a: "Root ile.", faq9q: "Yama çalışmadı?", faq9a: "Başka yöntem dene.", faq10q: "Yasal mı?", faq10a: "Araştırma ve kişisel kullanım.", changelogTitle: "Değişiklikler", ch1: "MPTools güncellendi, Crash Logger.", roadmapTitle: "Yol haritası", roadmapDesc: "Yapıldı ve devam ediyor.", rm1: "APK merger", rm2: "Patcher (9)", rm3: "APK Editor", rm4: "Çoklu dil", rm5: "Sıkıştırma motoru", rmDone: "Tamam", rmDev: "Devam ediyor", rmPlan: "Planlandı", devSectionTitle: "Geliştirici", devRole: "Android Developer · Reverse Engineer", devBio: "Magic HJ, Kiev, Ukrayna'dan bağımsız bir geliştiricidir. 7 yıldan fazla süredir Android'i derinlemesine inceliyor.", devBio2: "AntiSplit X'in yanı sıra reverse engineering hakkında blog yazıyor.", devYears: "yıl deneyim", devProjects: "proje", devFrom: "Ukrayna", devCoffee: "kahvede", devQuote: "\"Kod temiz, APK'lar bütün olmalı.\"", dlTitle: "En son sürümü indir", dlNote: "Dosya MediaFire'da barındırılıyor.", dlPreparing: "Bağlantı hazırlanıyor...", dlReady: "Bağlantı hazır!", dlDownload: "İndir", dlFinalNote: "Dosya yeni sekmede MediaFire'da açılacak" },
+  zh: { name: "中文", viewsLabel: "次浏览", heroTitle: "关于应用", heroText: "强大的反拆分合并器。", whatTitle: "这是什么？", whatP1: "<strong>AntiSplit X</strong> 合并 split APK。", whatP2: "<strong>MPTools</strong> 和 <strong>KitCore</strong>。", featTitle: "主要功能", feat1d: "合并已安装应用。", feat2d: "加载 APK。", feat3d: "编辑清单。", feat4d: "管理构建。", patchTitle: "Patcher", removeAds_d: "禁用广告。", killTrackers_d: "切断跟踪器。", removeAdsV2_d: "广告离线。", noPinning_d: "绕过固定。", rootBypass_d: "无 root。", noUpdate_d: "无强制更新。", licenseKiller_d: "强制允许。", crashLogger_d: "捕获崩溃。", signApk_d: "需要签名。", footerText: "AntiSplit X © 2026 · Android 社区", searchPh: "搜索...", noResults: "未找到 😕", faqTitle: "常见问题", faq1q: "什么是 split APK?", faq1a: "拆分 APK。", faq2q: "安全吗?", faq2a: "是的，本地。", faq3q: "需要 root?", faq3a: "不需要。", faq4q: "架构?", faq4a: "arm64-v8a。", faq5q: "为什么?", faq5a: "将拆分合并为一个 APK。", faq6q: "旧版 Android?", faq6a: "从 Android 8 起。", faq7q: "更新?", faq7a: "每 2-4 周。", faq8q: "系统应用?", faq8a: "需要 root。", faq9q: "补丁失败?", faq9a: "尝试其他方法。", faq10q: "合法吗?", faq10a: "用于研究和个人使用。", changelogTitle: "更新日志", ch1: "更新 MPTools，新增 Crash Logger。", roadmapTitle: "路线图", roadmapDesc: "已完成与进行中。", rm1: "APK 合并器", rm2: "Patcher (9)", rm3: "APK 编辑器", rm4: "多语言", rm5: "自研压缩引擎", rmDone: "完成", rmDev: "进行中", rmPlan: "计划中", devSectionTitle: "开发者", devRole: "Android Developer · Reverse Engineer", devBio: "Magic HJ 是来自乌克兰基辅的独立开发者。7 年多来深入研究 Android。", devBio2: "除 AntiSplit X 外，他还运营逆向工程博客。", devYears: "年经验", devProjects: "项目", devFrom: "乌克兰", devCoffee: "喝咖啡", devQuote: "\"代码要干净，APK 要完整。\"", dlTitle: "下载最新版本", dlNote: "文件托管在 MediaFire。", dlPreparing: "正在准备链接...", dlReady: "链接已就绪！", dlDownload: "下载", dlFinalNote: "文件将在新标签页中打开 MediaFire" },
+  ja: { name: "日本語", viewsLabel: "回閲覧", heroTitle: "アプリについて", heroText: "強力なアンチスプリットマージャー。", whatTitle: "これは何？", whatP1: "<strong>AntiSplit X</strong> は split APK を結合します。", whatP2: "<strong>MPTools</strong> と <strong>KitCore</strong>。", featTitle: "主な機能", feat1d: "アプリを結合。", feat2d: "APK を読み込む。", feat3d: "マニフェスト編集。", feat4d: "ビルド管理。", patchTitle: "Patcher", removeAds_d: "広告を無効化。", killTrackers_d: "トラッカー切断。", removeAdsV2_d: "広告オフライン。", noPinning_d: "Bypass pinning。", rootBypass_d: "Root 無し。", noUpdate_d: "強制更新無し。", licenseKiller_d: "Force allow。", crashLogger_d: "クラッシュ捕捉。", signApk_d: "署名必須。", footerText: "AntiSplit X © 2026 · Android コミュニティ", searchPh: "検索...", noResults: "見つかりません 😕", faqTitle: "FAQ", faq1q: "Split APK?", faq1a: "分割 APK。", faq2q: "安全?", faq2a: "はい、ローカル。", faq3q: "Root?", faq3a: "いいえ。", faq4q: "アーキ?", faq4a: "arm64-v8a。", faq5q: "なぜ?", faq5a: "Split を 1 APK に。", faq6q: "古い Android?", faq6a: "Android 8 以降。", faq7q: "更新?", faq7a: "2〜4 週間ごと。", faq8q: "システムアプリ?", faq8a: "Root 必要。", faq9q: "パッチ失敗?", faq9a: "別の方法を試す。", faq10q: "合法?", faq10a: "研究・個人利用向け。", changelogTitle: "変更履歴", ch1: "MPTools 更新、Crash Logger。", roadmapTitle: "ロードマップ", roadmapDesc: "完了と進行中。", rm1: "APK マージャー", rm2: "Patcher (9)", rm3: "APK エディタ", rm4: "多言語", rm5: "圧縮エンジン", rmDone: "完了", rmDev: "進行中", rmPlan: "予定", devSectionTitle: "開発者", devRole: "Android Developer · Reverse Engineer", devBio: "Magic HJ はウクライナ・キーウの独立系開発者。7 年以上 Android を深く研究。", devBio2: "AntiSplit X の他、リバースエンジニアリングのブログも運営。", devYears: "年の経験", devProjects: "プロジェクト", devFrom: "ウクライナ", devCoffee: "コーヒーで", devQuote: "\"コードは清く、APK は完全に。\"", dlTitle: "最新版をダウンロード", dlNote: "ファイルは MediaFire でホストされています。", dlPreparing: "リンクを準備中...", dlReady: "リンクの準備完了！", dlDownload: "ダウンロード", dlFinalNote: "新しいタブで MediaFire が開きます" },
+  ko: { name: "한국어", viewsLabel: "회 조회", heroTitle: "앱 소개", heroText: "강력한 안티 스플릿 머저.", whatTitle: "이게 뭐죠?", whatP1: "<strong>AntiSplit X</strong>는 split APK를 병합합니다.", whatP2: "<strong>MPTools</strong>와 <strong>KitCore</strong>.", featTitle: "주요 기능", feat1d: "앱 병합.", feat2d: "APK 로드.", feat3d: "매니페스트 편집.", feat4d: "빌드 관리.", patchTitle: "Patcher", removeAds_d: "광고 비활성화.", killTrackers_d: "트래커 차단.", removeAdsV2_d: "광고 오프라인.", noPinning_d: "Pinning 우회.", rootBypass_d: "루트 없음.", noUpdate_d: "강제 업데이트 없음.", licenseKiller_d: "Force allow.", crashLogger_d: "크래시 포착.", signApk_d: "서명 필요.", footerText: "AntiSplit X © 2026 · Android 커뮤니티", searchPh: "검색...", noResults: "찾을 수 없음 😕", faqTitle: "FAQ", faq1q: "Split APK?", faq1a: "분할 APK.", faq2q: "안전?", faq2a: "네, 로컬.", faq3q: "루트?", faq3a: "아니요.", faq4q: "아키?", faq4a: "arm64-v8a.", faq5q: "왜?", faq5a: "split을 하나의 APK로.", faq6q: "구버전 Android?", faq6a: "Android 8부터.", faq7q: "업데이트?", faq7a: "2-4주마다.", faq8q: "시스템 앱?", faq8a: "루트 필요.", faq9q: "패치 실패?", faq9a: "다른 방법 시도.", faq10q: "합법?", faq10a: "연구 및 개인용.", changelogTitle: "변경사항", ch1: "MPTools 업데이트, Crash Logger.", roadmapTitle: "로드맵", roadmapDesc: "완료 및 진행 중.", rm1: "APK 머저", rm2: "Patcher (9)", rm3: "APK 에디터", rm4: "다국어", rm5: "압축 엔진", rmDone: "완료", rmDev: "진행 중", rmPlan: "예정", devSectionTitle: "개발자", devRole: "Android Developer · Reverse Engineer", devBio: "Magic HJ는 우크라이나 키이우의 독립 개발자입니다. 7년 넘게 Android를 깊이 연구해 왔습니다.", devBio2: "AntiSplit X 외에도 리버스 엔지니어링 블로그를 운영합니다.", devYears: "년 경력", devProjects: "프로젝트", devFrom: "우크라이나", devCoffee: "커피와 함께", devQuote: "\"코드는 깨끗하게, APK는 온전하게.\"", dlTitle: "최신 버전 다운로드", dlNote: "파일은 MediaFire에서 호스팅됩니다.", dlPreparing: "링크 준비 중...", dlReady: "링크 준비 완료!", dlDownload: "다운로드", dlFinalNote: "새 탭에서 MediaFire가 열립니다" },
+  ar: { name: "العربية", viewsLabel: "مشاهدة", heroTitle: "حول التطبيق", heroText: "دمج قوي مضاد للتقسيم.", whatTitle: "ما هذا؟", whatP1: "<strong>AntiSplit X</strong> يعيد تجميع APK.", whatP2: "<strong>MPTools</strong> و <strong>KitCore</strong>.", featTitle: "الميزات", feat1d: "دمج التطبيقات.", feat2d: "تحميل APK.", feat3d: "تعديل المانيفست.", feat4d: "إدارة البنيات.", patchTitle: "Patcher", removeAds_d: "تعطيل الإعلانات.", killTrackers_d: "قطع المتتبعات.", removeAdsV2_d: "إعلانات غير متصلة.", noPinning_d: "تجاوز pinning.", rootBypass_d: "لا روت.", noUpdate_d: "لا تحديث قسري.", licenseKiller_d: "Force allow.", crashLogger_d: "التقاط الأعطال.", signApk_d: "التوقيع مطلوب.", footerText: "AntiSplit X © 2026 · مجتمع Android", searchPh: "بحث...", noResults: "لم يُعثر 😕", faqTitle: "الأسئلة", faq1q: "Split APK؟", faq1a: "APK مقسم.", faq2q: "آمن؟", faq2a: "نعم، محلياً.", faq3q: "روت؟", faq3a: "لا.", faq4q: "المعماريات؟", faq4a: "arm64-v8a.", faq5q: "لماذا؟", faq5a: "لدمج split في APK واحد.", faq6q: "Android قديم؟", faq6a: "من Android 8.", faq7q: "التحديثات؟", faq7a: "كل 2-4 أسابيع.", faq8q: "تطبيقات النظام؟", faq8a: "مع root.", faq9q: "فشل التصحيح؟", faq9a: "جرّب طريقة أخرى.", faq10q: "قانوني؟", faq10a: "للبحث والاستخدام الشخصي.", changelogTitle: "السجل", ch1: "تحديث MPTools، Crash Logger.", roadmapTitle: "خطة التطوير", roadmapDesc: "منجز وقيد التنفيذ.", rm1: "دمج APK", rm2: "Patcher (9)", rm3: "محرر APK", rm4: "تعدد اللغات", rm5: "محرك ضغط", rmDone: "منجز", rmDev: "قيد التنفيذ", rmPlan: "مخطط", devSectionTitle: "المطور", devRole: "Android Developer · Reverse Engineer", devBio: "Magic HJ مطور مستقل من كييف، أوكرانيا. يدرس Android بعمق منذ أكثر من 7 سنوات.", devBio2: "بجانب AntiSplit X، يدير مدونة عن الهندسة العكسية.", devYears: "سنوات خبرة", devProjects: "مشروع", devFrom: "أوكرانيا", devCoffee: "على القهوة", devQuote: "\"الكود نظيف و APK كامل.\"", dlTitle: "تحميل أحدث إصدار", dlNote: "الملف مستضاف على MediaFire.", dlPreparing: "جارٍ تحضير الرابط...", dlReady: "الرابط جاهز!", dlDownload: "تحميل", dlFinalNote: "سيفتح الملف على MediaFire في تبويب جديد" },
+  hi: { name: "हिन्दी", viewsLabel: "व्यूज़", heroTitle: "ऐप के बारे में", heroText: "शक्तिशाली anti-split merger।", whatTitle: "यह क्या है?", whatP1: "<strong>AntiSplit X</strong> split APK जोड़ता है।", whatP2: "<strong>MPTools</strong> और <strong>KitCore</strong>।", featTitle: "विशेषताएँ", feat1d: "ऐप्स मर्ज करें।", feat2d: "APK लोड करें।", feat3d: "Manifest एडिट।", feat4d: "Build मैनेज करें।", patchTitle: "Patcher", removeAds_d: "विज्ञापन बंद।", killTrackers_d: "ट्रैकर काटें।", removeAdsV2_d: "विज्ञापन ऑफ़लाइन।", noPinning_d: "Pinning bypass।", rootBypass_d: "रूट नहीं।", noUpdate_d: "कोई फ़ोर्स अपडेट नहीं।", licenseKiller_d: "Force allow।", crashLogger_d: "क्रैश पकड़ें।", signApk_d: "हस्ताक्षर ज़रूरी।", footerText: "AntiSplit X © 2026 · Android समुदाय", searchPh: "खोजें...", noResults: "कुछ नहीं मिला 😕", faqTitle: "सामान्य प्रश्न", faq1q: "Split APK?", faq1a: "विभाजित APK।", faq2q: "सुरक्षित?", faq2a: "हाँ, लोकल।", faq3q: "रूट?", faq3a: "नहीं।", faq4q: "आर्क?", faq4a: "arm64-v8a।", faq5q: "क्यों?", faq5a: "Split को एक APK बनाने के लिए।", faq6q: "पुराना Android?", faq6a: "Android 8 से।", faq7q: "अपडेट?", faq7a: "हर 2-4 हफ्ते।", faq8q: "सिस्टम ऐप्स?", faq8a: "रूट के साथ।", faq9q: "पैच फेल?", faq9a: "दूसरा तरीका आज़माएँ।", faq10q: "कानूनी?", faq10a: "रिसर्च और व्यक्तिगत उपयोग।", changelogTitle: "चेंजलॉग", ch1: "MPTools अपडेट, Crash Logger।", roadmapTitle: "रोडमैप", roadmapDesc: "पूर्ण और प्रगति पर।", rm1: "APK मर्जर", rm2: "Patcher (9)", rm3: "APK एडिटर", rm4: "बहुभाषी", rm5: "कम्प्रेशन इंजन", rmDone: "पूर्ण", rmDev: "प्रगति पर", rmPlan: "योजना", devSectionTitle: "डेवलपर", devRole: "Android Developer · Reverse Engineer", devBio: "Magic HJ यूक्रेन के कीव से एक स्वतंत्र डेवलपर है। 7 साल से अधिक समय से Android को समझ रहा है।", devBio2: "AntiSplit X के अलावा reverse engineering पर ब्लॉग भी चलाता है।", devYears: "साल का अनुभव", devProjects: "प्रोजेक्ट", devFrom: "यूक्रेन", devCoffee: "कॉफ़ी पर", devQuote: "\"कोड साफ़, APK पूरा।\"", dlTitle: "नवीनतम संस्करण डाउनलोड करें", dlNote: "फ़ाइल MediaFire पर होस्ट है।", dlPreparing: "लिंक तैयार हो रहा है...", dlReady: "लिंक तैयार!", dlDownload: "डाउनलोड", dlFinalNote: "फ़ाइल नए टैब में MediaFire पर खुलेगी" },
+  id: { name: "Bahasa Indonesia", viewsLabel: "dilihat", heroTitle: "Tentang", heroText: "Anti-split merger kuat.", whatTitle: "Apa ini?", whatP1: "<strong>AntiSplit X</strong> menggabungkan split APK.", whatP2: "Mesin <strong>MPTools</strong> dan <strong>KitCore</strong>.", featTitle: "Fitur", feat1d: "Gabungkan app.", feat2d: "Muat APK.", feat3d: "Edit manifest.", feat4d: "Kelola build.", patchTitle: "Patcher", removeAds_d: "Matikan iklan.", killTrackers_d: "Potong tracker.", removeAdsV2_d: "Iklan offline.", noPinning_d: "Bypass pinning.", rootBypass_d: "Tanpa root.", noUpdate_d: "Tanpa update paksa.", licenseKiller_d: "Force allow.", crashLogger_d: "Tangkap crash.", signApk_d: "Tanda tangan wajib.", footerText: "AntiSplit X © 2026 · Komunitas Android", searchPh: "Cari...", noResults: "Tidak ditemukan 😕", faqTitle: "FAQ", faq1q: "Split APK?", faq1a: "APK terbagi.", faq2q: "Aman?", faq2a: "Ya, lokal.", faq3q: "Root?", faq3a: "Tidak.", faq4q: "Arsitektur?", faq4a: "arm64-v8a.", faq5q: "Kenapa?", faq5a: "Untuk gabung split jadi satu APK.", faq6q: "Android lama?", faq6a: "Dari Android 8.", faq7q: "Update?", faq7a: "Tiap 2-4 minggu.", faq8q: "App sistem?", faq8a: "Perlu root.", faq9q: "Patch gagal?", faq9a: "Coba metode lain.", faq10q: "Legal?", faq10a: "Untuk riset dan pribadi.", changelogTitle: "Changelog", ch1: "MPTools diperbarui, Crash Logger.", roadmapTitle: "Roadmap", roadmapDesc: "Selesai & berjalan.", rm1: "Merger APK", rm2: "Patcher (9)", rm3: "APK Editor", rm4: "Multi-bahasa", rm5: "Mesin kompresi", rmDone: "Selesai", rmDev: "Berjalan", rmPlan: "Direncanakan", devSectionTitle: "Pengembang", devRole: "Android Developer · Reverse Engineer", devBio: "Magic HJ adalah pengembang independen dari Kyiv, Ukraina. Lebih dari 7 tahun mendalami Android.", devBio2: "Selain AntiSplit X, ia mengelola blog tentang reverse engineering.", devYears: "tahun pengalaman", devProjects: "proyek", devFrom: "Ukraina", devCoffee: "di kopi", devQuote: "\"Kode bersih, APK utuh.\"", dlTitle: "Unduh versi terbaru", dlNote: "File dihosting di MediaFire.", dlPreparing: "Menyiapkan tautan...", dlReady: "Tautan siap!", dlDownload: "Unduh", dlFinalNote: "File akan dibuka di MediaFire di tab baru" },
+  vi: { name: "Tiếng Việt", viewsLabel: "lượt xem", heroTitle: "Về ứng dụng", heroText: "Anti-split merger mạnh mẽ.", whatTitle: "Đây là gì?", whatP1: "<strong>AntiSplit X</strong> gộp split APK.", whatP2: "Engine <strong>MPTools</strong> và <strong>KitCore</strong>.", featTitle: "Tính năng", feat1d: "Gộp ứng dụng.", feat2d: "Tải APK.", feat3d: "Sửa manifest.", feat4d: "Quản lý build.", patchTitle: "Patcher", removeAds_d: "Tắt quảng cáo.", killTrackers_d: "Cắt tracker.", removeAdsV2_d: "Quảng cáo offline.", noPinning_d: "Bypass pinning.", rootBypass_d: "Không root.", noUpdate_d: "Không ép cập nhật.", licenseKiller_d: "Force allow.", crashLogger_d: "Bắt crash.", signApk_d: "Cần chữ ký.", footerText: "AntiSplit X © 2026 · Cộng đồng Android", searchPh: "Tìm...", noResults: "Không tìm thấy 😕", faqTitle: "FAQ", faq1q: "Split APK?", faq1a: "APK chia.", faq2q: "An toàn?", faq2a: "Có, cục bộ.", faq3q: "Root?", faq3a: "Không.", faq4q: "Kiến trúc?", faq4a: "arm64-v8a.", faq5q: "Tại sao?", faq5a: "Gộp split thành một APK.", faq6q: "Android cũ?", faq6a: "Từ Android 8.", faq7q: "Cập nhật?", faq7a: "Mỗi 2-4 tuần.", faq8q: "App hệ thống?", faq8a: "Cần root.", faq9q: "Patch lỗi?", faq9a: "Thử cách khác.", faq10q: "Hợp pháp?", faq10a: "Cho nghiên cứu và cá nhân.", changelogTitle: "Changelog", ch1: "Cập nhật MPTools, Crash Logger.", roadmapTitle: "Lộ trình", roadmapDesc: "Đã xong & đang làm.", rm1: "Merger APK", rm2: "Patcher (9)", rm3: "APK Editor", rm4: "Đa ngôn ngữ", rm5: "Engine nén", rmDone: "Xong", rmDev: "Đang làm", rmPlan: "Dự kiến", devSectionTitle: "Nhà phát triển", devRole: "Android Developer · Reverse Engineer", devBio: "Magic HJ là nhà phát triển độc lập từ Kyiv, Ukraine. Hơn 7 năm nghiên cứu sâu về Android.", devBio2: "Ngoài AntiSplit X, anh còn viết blog về reverse engineering.", devYears: "năm kinh nghiệm", devProjects: "dự án", devFrom: "Ukraine", devCoffee: "với cà phê", devQuote: "\"Code sạch, APK nguyên vẹn.\"", dlTitle: "Tải phiên bản mới nhất", dlNote: "File được lưu trữ trên MediaFire.", dlPreparing: "Đang chuẩn bị liên kết...", dlReady: "Liên kết đã sẵn sàng!", dlDownload: "Tải xuống", dlFinalNote: "File sẽ mở trên MediaFire trong tab mới" },
+  th: { name: "ไทย", viewsLabel: "ครั้งที่ดู", heroTitle: "เกี่ยวกับ", heroText: "anti-split merger ทรงพลัง", whatTitle: "นี่คืออะไร?", whatP1: "<strong>AntiSplit X</strong> รวม split APK", whatP2: "เอนจิน <strong>MPTools</strong> และ <strong>KitCore</strong>", featTitle: "ฟีเจอร์", feat1d: "รวมแอป", feat2d: "โหลด APK", feat3d: "แก้ manifest", feat4d: "จัดการ build", patchTitle: "Patcher", removeAds_d: "ปิดโฆษณา", killTrackers_d: "ตัด tracker", removeAdsV2_d: "โฆษณาออฟไลน์", noPinning_d: "บายพาส pinning", rootBypass_d: "ไม่มี root", noUpdate_d: "ไม่อัปเดตบังคับ", licenseKiller_d: "Force allow", crashLogger_d: "จับ crash", signApk_d: "ต้องเซ็นชื่อ", footerText: "AntiSplit X © 2026 · ชุมชน Android", searchPh: "ค้นหา...", noResults: "ไม่พบ 😕", faqTitle: "FAQ", faq1q: "Split APK?", faq1a: "APK แยก", faq2q: "ปลอดภัย?", faq2a: "ใช่, ท้องถิ่น", faq3q: "Root?", faq3a: "ไม่", faq4q: "สถาปัตย์?", faq4a: "arm64-v8a", faq5q: "ทำไม?", faq5a: "รวม split เป็น APK เดียว", faq6q: "Android เก่า?", faq6a: "จาก Android 8", faq7q: "อัปเดต?", faq7a: "ทุก 2-4 สัปดาห์", faq8q: "แอประบบ?", faq8a: "ต้อง root", faq9q: "แพตช์ล้มเหลว?", faq9a: "ลองวิธีอื่น", faq10q: "ถูกกฎหมาย?", faq10a: "สำหรับวิจัยและส่วนตัว", changelogTitle: "Changelog", ch1: "อัปเดต MPTools, Crash Logger", roadmapTitle: "โรดแมป", roadmapDesc: "เสร็จและกำลังทำ", rm1: "APK merger", rm2: "Patcher (9)", rm3: "APK Editor", rm4: "หลายภาษา", rm5: "เอนจินบีบอัด", rmDone: "เสร็จ", rmDev: "กำลังทำ", rmPlan: "วางแผน", devSectionTitle: "นักพัฒนา", devRole: "Android Developer · Reverse Engineer", devBio: "Magic HJ เป็นนักพัฒนาอิสระจาก Kyiv ยูเครน กว่า 7 ปีที่ศึกษาภายในของ Android", devBio2: "นอกจาก AntiSplit X ยังมีบล็อกเรื่อง reverse engineering", devYears: "ปีประสบการณ์", devProjects: "โปรเจกต์", devFrom: "ยูเครน", devCoffee: "กับกาแฟ", devQuote: "\"โค้ดสะอาด APK ครบถ้วน\"", dlTitle: "ดาวน์โหลดเวอร์ชันล่าสุด", dlNote: "ไฟล์โฮสต์บน MediaFire", dlPreparing: "กำลังเตรียมลิงก์...", dlReady: "ลิงก์พร้อมแล้ว!", dlDownload: "ดาวน์โหลด", dlFinalNote: "ไฟล์จะเปิดบน MediaFire ในแท็บใหม่" },
+  nl: { name: "Nederlands", viewsLabel: "weergaven", heroTitle: "Over", heroText: "Krachtige anti-split merger.", whatTitle: "Wat is dit?", whatP1: "<strong>AntiSplit X</strong> voegt split APK's samen.", whatP2: "<strong>MPTools</strong> en <strong>KitCore</strong>.", featTitle: "Functies", feat1d: "Voeg apps samen.", feat2d: "APK laden.", feat3d: "Manifest bewerken.", feat4d: "Builds beheren.", patchTitle: "Patcher", removeAds_d: "Ads uit.", killTrackers_d: "Trackers kappen.", removeAdsV2_d: "Ads offline.", noPinning_d: "Bypass pinning.", rootBypass_d: "Geen root.", noUpdate_d: "Geen forced update.", licenseKiller_d: "Force allow.", crashLogger_d: "Vangt crashes.", signApk_d: "Handtekening.", footerText: "AntiSplit X © 2026 · Android-gemeenschap", searchPh: "Zoeken...", noResults: "Niets gevonden 😕", faqTitle: "FAQ", faq1q: "Split APK?", faq1a: "Gesplitste APK.", faq2q: "Veilig?", faq2a: "Ja, lokaal.", faq3q: "Root?", faq3a: "Nee.", faq4q: "Architecturen?", faq4a: "arm64-v8a.", faq5q: "Waarom?", faq5a: "Split naar één APK.", faq6q: "Oude Android?", faq6a: "Vanaf Android 8.", faq7q: "Updates?", faq7a: "Elke 2-4 weken.", faq8q: "Systeem-apps?", faq8a: "Met root.", faq9q: "Patch faalde?", faq9a: "Probeer andere methode.", faq10q: "Legaal?", faq10a: "Voor onderzoek en persoonlijk gebruik.", changelogTitle: "Changelog", ch1: "MPTools update, Crash Logger.", roadmapTitle: "Roadmap", roadmapDesc: "Klaar en bezig.", rm1: "APK merger", rm2: "Patcher (9)", rm3: "APK Editor", rm4: "Meertalig", rm5: "Compressie-engine", rmDone: "Klaar", rmDev: "Bezig", rmPlan: "Gepland", devSectionTitle: "Ontwikkelaar", devRole: "Android Developer · Reverse Engineer", devBio: "Magic HJ is een onafhankelijke ontwikkelaar uit Kyiv, Oekraïne. Al meer dan 7 jaar verdiept hij zich in Android.", devBio2: "Naast AntiSplit X runt hij een blog over reverse engineering.", devYears: "jaar ervaring", devProjects: "projecten", devFrom: "Oekraïne", devCoffee: "op koffie", devQuote: "\"Code netjes, APK's heel.\"", dlTitle: "Nieuwste versie downloaden", dlNote: "Bestand wordt gehost op MediaFire.", dlPreparing: "Link voorbereiden...", dlReady: "Link is klaar!", dlDownload: "Download", dlFinalNote: "Bestand opent op MediaFire in een nieuw tabblad" },
+  cs: { name: "Čeština", viewsLabel: "zobrazení", heroTitle: "O aplikaci", heroText: "Výkonný anti-split merger.", whatTitle: "Co to je?", whatP1: "<strong>AntiSplit X</strong> sloučí split APK.", whatP2: "<strong>MPTools</strong> a <strong>KitCore</strong>.", featTitle: "Funkce", feat1d: "Sloučí aplikace.", feat2d: "Načíst APK.", feat3d: "Upravit manifest.", feat4d: "Spravovat buildy.", patchTitle: "Patcher", removeAds_d: "Vypne reklamy.", killTrackers_d: "Odstraní trackery.", removeAdsV2_d: "Reklamy offline.", noPinning_d: "Bypass pinning.", rootBypass_d: "Bez rootu.", noUpdate_d: "Žádné vynucené aktualizace.", licenseKiller_d: "Force allow.", crashLogger_d: "Chytá crashe.", signApk_d: "Vyžadován podpis.", footerText: "AntiSplit X © 2026 · Android komunita", searchPh: "Hledat...", noResults: "Nic nenalezeno 😕", faqTitle: "FAQ", faq1q: "Split APK?", faq1a: "Rozdělené APK.", faq2q: "Bezpečné?", faq2a: "Ano, lokálně.", faq3q: "Root?", faq3a: "Ne.", faq4q: "Architektury?", faq4a: "arm64-v8a.", faq5q: "Proč?", faq5a: "Spojit split do jednoho APK.", faq6q: "Starý Android?", faq6a: "Od Android 8.", faq7q: "Aktualizace?", faq7a: "Každé 2-4 týdny.", faq8q: "Systémové appky?", faq8a: "S rootem.", faq9q: "Patch selhal?", faq9a: "Zkuste jinou metodu.", faq10q: "Legální?", faq10a: "Pro výzkum a osobní použití.", changelogTitle: "Changelog", ch1: "MPTools update, Crash Logger.", roadmapTitle: "Roadmapa", roadmapDesc: "Hotovo a v procesu.", rm1: "APK merger", rm2: "Patcher (9)", rm3: "APK Editor", rm4: "Vícejazyčnost", rm5: "Kompresní engine", rmDone: "Hotovo", rmDev: "V procesu", rmPlan: "Plánováno", devSectionTitle: "Vývojář", devRole: "Android Developer · Reverse Engineer", devBio: "Magic HJ je nezávislý vývojář z Kyjeva na Ukrajině. Více než 7 let zkoumá Android do hloubky.", devBio2: "Kromě AntiSplit X vede blog o reverse engineeringu.", devYears: "let zkušeností", devProjects: "projektů", devFrom: "Ukrajina", devCoffee: "na kávě", devQuote: "\"Kód čistý, APK celé.\"", dlTitle: "Stáhnout nejnovější verzi", dlNote: "Soubor je hostován na MediaFire.", dlPreparing: "Připravuji odkaz...", dlReady: "Odkaz je připraven!", dlDownload: "Stáhnout", dlFinalNote: "Soubor se otevře na MediaFire v nové kartě" }
+};
+
+let currentLang = 'ru';
+
+function t(key) {
+  const dict = i18n[currentLang] || {};
+  if (dict[key] !== undefined) return dict[key];
+  return i18n.en[key] || '';
+}
+
+const langMenu = document.getElementById('langMenu');
+const currentLangEl = document.getElementById('currentLang');
+Object.keys(i18n).forEach(code => {
+  const item = document.createElement('div');
+  item.className = 'lang-item';
+  item.dataset.code = code;
+  item.innerHTML = `<span>${i18n[code].name}</span><span style="opacity:.4;font-size:.8em">${code.toUpperCase()}</span>`;
+  item.addEventListener('click', () => setLang(code));
+  langMenu.appendChild(item);
+});
+
+document.getElementById('langBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  langMenu.classList.toggle('open');
+});
+document.addEventListener('click', () => langMenu.classList.remove('open'));
+
+function setLang(code) {
+  if (!i18n[code]) return;
+  currentLang = code;
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = t(el.dataset.i18n);
+    if (v) el.innerHTML = v;
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const v = t(el.dataset.i18nPh);
+    if (v) el.placeholder = v;
+  });
+
+  document.documentElement.lang = code;
+  currentLangEl.textContent = i18n[code].name;
+  document.querySelectorAll('.lang-item').forEach(it =>
+    it.classList.toggle('active', it.dataset.code === code)
+  );
+  localStorage.setItem('as_lang', code);
+  langMenu.classList.remove('open');
+}
+
+const themeBtn = document.getElementById('themeBtn');
+function applyTheme(dark) {
+  document.body.classList.toggle('dark', dark);
+  themeBtn.textContent = dark ? '☀️' : '🌙';
+  localStorage.setItem('as_theme', dark ? 'dark' : 'light');
+}
+themeBtn.addEventListener('click', () => {
+  applyTheme(!document.body.classList.contains('dark'));
+});
+
+const toTop = document.getElementById('toTop');
+window.addEventListener('scroll', () => {
+  toTop.classList.toggle('show', window.scrollY > 400);
+});
+toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+const toast = document.getElementById('toast');
+let toastTimer;
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(location.href);
+    showToast('✅ ' + (currentLang === 'ru' ? 'Ссылка скопирована!' : 'Link copied!'));
+  } catch {
+    showToast('❌ Error');
+  }
+});
+
+const searchInput = document.getElementById('searchInput');
+const patchGrid = document.getElementById('patchGrid');
+const noResults = document.getElementById('noResults');
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.trim().toLowerCase();
+  let visible = 0;
+  patchGrid.querySelectorAll('.feature').forEach(card => {
+    const text = card.textContent.toLowerCase();
+    const match = !q || text.includes(q);
+    card.classList.toggle('hide', !match);
+    if (match) visible++;
+  });
+  noResults.style.display = visible === 0 ? 'block' : 'none';
+});
+
+document.querySelectorAll('.faq-item').forEach(item => {
+  item.querySelector('.faq-q').addEventListener('click', () => {
+    item.classList.toggle('open');
+  });
+});
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add('visible');
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.panel').forEach(p => observer.observe(p));
+
+const konami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let kIdx = 0;
+document.addEventListener('keydown', e => {
+  const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  if (key === konami[kIdx]) {
+    kIdx++;
+    if (kIdx === konami.length) { kIdx = 0; triggerParty(); }
+  } else { kIdx = 0; }
+});
+
+function triggerParty() {
+  document.body.classList.add('party');
+  const emojis = ['🎉','✨','🎊','💎','🔥','⭐','🚀','💚'];
+  for (let i = 0; i < 40; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.animationDuration = (2 + Math.random() * 2) + 's';
+    c.style.animationDelay = (Math.random() * 0.5) + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 5000);
+  }
+  showToast('🎉 Конами активирован!');
+  setTimeout(() => document.body.classList.remove('party'), 4000);
+}
+
+/* ===== Download Flow ===== */
+const dlOverlay = document.getElementById('dlOverlay');
+const dlProgress = document.getElementById('dlProgress');
+const dlTimer = document.getElementById('dlTimer');
+const dlFinal = document.getElementById('dlFinal');
+const dlFinalBtn = document.getElementById('dlFinalBtn');
+let dlInterval = null;
+
+/* ⚠️ ВСТАВЬ СВОЮ ССЫЛКУ С MEDIAFIRE СЮДА: */
+const MEDIAFIRE_URL = "https://www.mediafire.com/your-file-link-here";
+
+document.getElementById('downloadBtn').addEventListener('click', () => {
+  dlFinalBtn.href = MEDIAFIRE_URL;
+  openDownload();
+});
+document.getElementById('dlClose').addEventListener('click', closeDownload);
+dlOverlay.addEventListener('click', e => {
+  if (e.target === dlOverlay) closeDownload();
+});
+
+function openDownload() {
+  dlOverlay.classList.add('show');
+  document.body.style.overflow = 'hidden';
+  resetDownload();
+  startCountdown();
+}
+function closeDownload() {
+  dlOverlay.classList.remove('show');
+  document.body.style.overflow = '';
+  if (dlInterval) { clearInterval(dlInterval); dlInterval = null; }
+}
+function resetDownload() {
+  dlProgress.style.width = '0%';
+  dlTimer.textContent = '15';
+  dlFinal.classList.remove('show');
+  if (dlInterval) clearInterval(dlInterval);
+}
+function startCountdown() {
+  let left = 15;
+  setTimeout(() => { dlProgress.style.width = '100%'; }, 50);
+  dlInterval = setInterval(() => {
+    left--;
+    dlTimer.textContent = left;
+    if (left <= 0) {
+      clearInterval(dlInterval);
+      dlInterval = null;
+      dlFinal.classList.add('show');
+    }
+  }, 1000);
+}
+
+/* ===== Views Counter ===== */
+const VIEWS_API = 'https://abacus.jasoncameron.dev/hit/antisplitx/website-views';
+
+fetch(VIEWS_API)
+  .then(r => r.json())
+  .then(data => {
+    const el = document.getElementById('viewCount');
+    if (el && data.value !== undefined) {
+      animateNumber(el, 0, data.value, 1400);
+    }
+  })
+  .catch(() => {
+    const el = document.getElementById('viewCount');
+    if (el) el.textContent = '—';
+  });
+
+function animateNumber(el, from, to, duration) {
+  const start = performance.now();
+  function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = Math.floor(from + (to - from) * eased).toLocaleString('ru-RU');
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ===== Init ===== */
+(function init() {
+  const savedTheme = localStorage.getItem('as_theme');
+  if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    applyTheme(true);
+  } else {
+    applyTheme(false);
+  }
+  const savedLang = localStorage.getItem('as_lang');
+  setLang(savedLang && i18n[savedLang] ? savedLang : 'ru');
+})();
+</script>
+</body>
+</html>
